@@ -1,0 +1,8 @@
+# Python dependencies - will be filled during development
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+xgboost
+python-multipart

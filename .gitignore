@@ -1,1 +1,21 @@
+# Dataset - too large for GitHub (110MB)
 data/raw/given.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db

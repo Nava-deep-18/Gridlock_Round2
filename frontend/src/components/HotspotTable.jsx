@@ -1,0 +1,1 @@
+// HotspotTable Component
