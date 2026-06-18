@@ -1,6 +1,9 @@
 # Dataset - too large for GitHub (110MB)
 data/raw/given.csv
 
+# Large processed files - use parquet instead
+data/processed/clean_violations.csv
+
 # Python
 __pycache__/
 *.py[cod]
