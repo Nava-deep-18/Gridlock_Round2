@@ -1,5 +1,40 @@
 # 🚗 Approach Strategy: AI-Driven Parking Intelligence for Bengaluru
 
+## Current Implementation Status
+
+### Completed So Far
+
+- Core pipeline is implemented in `src/`.
+- PICI scoring is fixed and now produces nonzero congestion-impact scores.
+- Historical feature output is generated in `data/processed/historical/featured_violations.parquet`.
+- DBSCAN hotspot detection is implemented and generates ranked hotspots.
+- XGBoost patrol-window prediction is implemented and generates patrol recommendations.
+- Pipeline sanity checks are added so broken outputs, missing columns, empty data, or all-zero impact scores fail early.
+- Historical processed output currently contains:
+  - 115,353 approved violation rows
+  - 211 detected hotspots
+  - 35,448 patrol recommendation windows
+- Backend has been modularized into a FastAPI package under `backend/app/`.
+- Backend currently supports:
+  - `GET /api/health`
+  - `GET /api/stats`
+  - `GET /api/hotspots`
+  - `GET /api/recommendations`
+  - `POST /api/upload`
+- Backend supports two modes:
+  - `historical`
+  - `new_data`
+
+### Still Pending
+
+- Test `/api/upload` end-to-end with `sample_data/sample_upload.csv`.
+- Add upload guardrails for file size, row count, and clearer schema errors.
+- Add richer dashboard endpoints for station, temporal, vehicle, and repeat-offender summaries.
+- Build the React/Vite frontend dashboard.
+- Deploy backend and frontend.
+
+---
+
 ## 1. Understanding the Dataset
 
 The provided CSV ([given.csv](file:///c:/programming/Gridlock_Round2/data/raw/given.csv)) contains **~298,451 parking violation records** from Bengaluru Traffic Police (BTP), spanning roughly **November 2023 to mid-2024**.
