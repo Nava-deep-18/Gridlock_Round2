@@ -1,9 +1,9 @@
 from pathlib import Path
 import pandas as pd
 
-from data_pipeline import clean_data
-from feature_engineering import engineer_features
-from ml_models import cluster_hotspots, train_and_predict
+from src.data_pipeline import clean_data
+from src.feature_engineering import engineer_features
+from src.ml_models import cluster_hotspots, train_and_predict
 
 FEATURE_INPUT_COLUMNS = {
     'id',
@@ -159,20 +159,26 @@ def print_sanity_report(featured_df: pd.DataFrame, hotspots_df: pd.DataFrame, pa
     print("\nTop patrol windows by priority score:")
     print(top_patrols.to_string(index=False))
 
-def run_pipeline():
-    print("=== Starting ParkSense AI Pipeline ===")
+def run_pipeline(mode: str = "historical"):
+    print(f"=== Starting ParkSense AI Pipeline [{mode.upper()} MODE] ===")
     
     # Setup Paths
     BASE_DIR = Path(__file__).resolve().parent.parent
-    DATA_DIR = BASE_DIR / "data" / "processed"
+    DATA_DIR = BASE_DIR / "data" / "processed" / mode
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     
-    raw_candidates = [
-        BASE_DIR / "data" / "violations.csv",
-        BASE_DIR / "data" / "raw" / "given.csv",
-    ]
-    RAW_DATA = next((path for path in raw_candidates if path.exists()), None)
-    # Assuming clean_violations.parquet already exists from Notebook 01, we'll start from there if RAW doesn't exist
+    if mode == "historical":
+        raw_candidates = [
+            BASE_DIR / "data" / "violations.csv",
+            BASE_DIR / "data" / "raw" / "given.csv",
+        ]
+        RAW_DATA = next((path for path in raw_candidates if path.exists()), None)
+    else:
+        # new_data mode
+        RAW_DATA = BASE_DIR / "data" / "raw" / "new_violations.csv"
+        if not RAW_DATA.exists():
+            raise FileNotFoundError(f"Missing new data upload at {RAW_DATA}")
+
     CLEAN_DATA = DATA_DIR / "clean_violations.parquet"
     FEATURED_DATA = DATA_DIR / "featured_violations.parquet"
     HOTSPOTS_DATA = DATA_DIR / "hotspots.parquet"
@@ -180,12 +186,12 @@ def run_pipeline():
     PATROLS_DATA = DATA_DIR / "patrol_recommendations.parquet"
     
     # 1. Data Cleaning
-    if RAW_DATA is not None:
+    if RAW_DATA is not None and RAW_DATA.exists():
         clean_data(RAW_DATA, CLEAN_DATA)
     elif CLEAN_DATA.exists():
         print(f"Skipping clean_data: using existing {CLEAN_DATA.name}")
     else:
-        raise FileNotFoundError(f"Cannot find raw or clean data in {DATA_DIR.parent}")
+        raise FileNotFoundError(f"Cannot find raw or clean data for mode {mode}")
     validate_feature_input(CLEAN_DATA)
 
     # 2. Feature Engineering
@@ -204,4 +210,4 @@ def run_pipeline():
     print("\n=== Pipeline Execution Complete ===")
 
 if __name__ == "__main__":
-    run_pipeline()
+    run_pipeline(mode="historical")
