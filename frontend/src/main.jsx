@@ -81,13 +81,16 @@ async function loadDashboard(mode = state.mode) {
 
   try {
     if (state.view === "map") {
-      const heatmap = await fetchOptional(modePath("/api/heatmap?limit=2500", mode), []);
+      const [heatmap, hotspots] = await Promise.all([
+        fetchOptional(modePath("/api/heatmap?limit=2500", mode), []),
+        fetchOptional(modePath("/api/hotspots", mode), []),
+      ]);
       root.innerHTML = renderMapPage({
         mode,
         view: state.view,
         navOpen: state.navOpen,
       });
-      initMapView(heatmap);
+      initMapView(heatmap, hotspots, mode);
     } else if (state.view === "dispatch") {
       const [hotspots, recommendations] = await Promise.all([
         fetchJson(modePath("/api/hotspots", mode)),

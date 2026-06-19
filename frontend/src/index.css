@@ -1417,3 +1417,17 @@ button[type="submit"]:disabled {
   .hero { padding: 18px; min-height: auto; }
   .hero-visual { min-height: 180px; }
 }
+
+/* ─── Leaflet Dark Mode Popup Styling ────────────────────────── */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border-strong) !important;
+  box-shadow: var(--shadow) !important;
+  border-radius: 8px !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-2) !important;
+  padding: 6px !important;
+}
