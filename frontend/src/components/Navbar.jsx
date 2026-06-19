@@ -36,19 +36,31 @@ const NAV_ITEMS = [
       </svg>
     `,
   },
+  {
+    id: "dispatch",
+    type: "view",
+    label: "Smart Dispatch",
+    icon: `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <circle cx="12" cy="11" r="3" />
+        <path d="M12 14v4" />
+      </svg>
+    `,
+  },
 ];
 
 // activeMode: "historical" | "new_data"
-// activeView: "dashboard" | "map"
+// activeView: "dashboard" | "map" | "dispatch"
 export function renderNavbar(activeMode, activeView, isOpen = false) {
   const buttons = NAV_ITEMS.map((item) => {
     // An item is "active" if:
     //   - type=mode → its mode matches && we're in dashboard view
-    //   - type=view → we're in map view (only the map item)
+    //   - type=view → we're in the corresponding view
     const isActive =
       item.type === "mode"
         ? activeView === "dashboard" && activeMode === item.id
-        : activeView === "map";
+        : activeView === item.id;
 
     const dataAttr =
       item.type === "mode"

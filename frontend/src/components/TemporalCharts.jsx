@@ -1,7 +1,7 @@
 export function renderPatrolWindows(recommendations) {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const cards = recommendations.map((item, index) => `
-    <li class="deployment-item">
+    <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
       <div class="deployment-rank">${index + 1}</div>
       <div class="deployment-body">
         <div class="deployment-topline">
@@ -10,10 +10,10 @@ export function renderPatrolWindows(recommendations) {
         </div>
         <div class="deployment-meta">
           <span>Expected <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
-          <span>PICI <b>${Number(item.predicted_pici).toFixed(1)}</b></span>
+          <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
         </div>
       </div>
-      <div class="priority-score">${Number(item.priority_score).toFixed(2)}</div>
+      <div class="priority-score" title="Priority Score (Expected Violations x Congestion Impact)">${Number(item.priority_score).toFixed(2)}</div>
     </li>
   `).join("");
 
@@ -24,6 +24,9 @@ export function renderPatrolWindows(recommendations) {
         <strong>Smart Windows</strong>
       </div>
       <h2>Deployment Recs</h2>
+      <p style="font-size: 11px; color: var(--text-2); margin: -4px 0 12px 0; line-height: 1.4;">
+        Priority Score = Expected Violations × Congestion Impact (PICI). High scores indicate urgent patrol windows.
+      </p>
       <ul class="deployment-list scrollable-container">${cards}</ul>
       <div class="deployment-cta">
         <span>Suggested by temporal violation probability model (MAE: 3.4)</span>

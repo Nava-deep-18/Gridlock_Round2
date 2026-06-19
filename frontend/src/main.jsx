@@ -1,6 +1,7 @@
 import "./index.css";
 import { renderDashboard } from "./components/Dashboard.jsx";
 import { initMapView, renderMapPage } from "./components/MapView.jsx";
+import { renderDispatchPage, initDispatchView } from "./components/DispatchView.jsx";
 import { renderNavbar } from "./components/Navbar.jsx";
 import { fetchJson, modePath, uploadCsv } from "./utils/apiClient.js";
 
@@ -87,6 +88,17 @@ async function loadDashboard(mode = state.mode) {
         navOpen: state.navOpen,
       });
       initMapView(heatmap);
+    } else if (state.view === "dispatch") {
+      const [hotspots, recommendations] = await Promise.all([
+        fetchJson(modePath("/api/hotspots", mode)),
+        fetchJson(modePath("/api/recommendations", mode)),
+      ]);
+      root.innerHTML = renderDispatchPage({
+        mode,
+        view: state.view,
+        navOpen: state.navOpen,
+      });
+      initDispatchView(hotspots, recommendations);
     } else {
       const [
         health, stats, hotspots, recommendations, stationSummary,
@@ -139,9 +151,9 @@ function bindNav() {
       const nextMode = button.dataset.mode;
       if (!nextMode || state.isLoading) return;
       
-      // If switching mode from within the map view's header controls, keep the map view active
-      if (state.view === "map" && button.closest(".mode-toggle-group")) {
-        // Keep map view active
+      // If switching mode from within the map or dispatch header controls, keep the active view
+      if ((state.view === "map" || state.view === "dispatch") && button.closest(".mode-toggle-group")) {
+        // Keep active view (map or dispatch)
       } else {
         if (nextMode === state.mode && state.view === "dashboard") return;
         state.view = "dashboard";

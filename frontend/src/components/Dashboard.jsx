@@ -69,13 +69,12 @@ export function renderDashboard({
 
       <section class="analysis-grid" id="operational-load">
         ${renderStationDashboard(stationSummary)}
-        ${renderPatrolWindows(recommendations)}
+        ${renderRepeatOffenders(repeatOffenders)}
       </section>
 
-      <section class="intelligence-grid" id="decision-intelligence">
+      <section class="intelligence-grid" id="decision-intelligence" style="grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr)">
         ${renderTemporalInsights(temporalSummary)}
         ${renderVehicleAnalysis(vehicleSummary)}
-        ${renderRepeatOffenders(repeatOffenders)}
       </section>
     </main>
   `;
