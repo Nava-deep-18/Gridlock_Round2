@@ -137,9 +137,10 @@ function bindNav() {
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => {
       const nextMode = button.dataset.mode;
-      if (!nextMode || nextMode === state.mode || state.isLoading) return;
-      // If triggered from the navbar or map toggle, simply switch mode and stay in current view
-      // Unless they click the specific map button again
+      if (!nextMode || state.isLoading) return;
+      if (nextMode === state.mode && state.view === "dashboard") return;
+      
+      state.view = "dashboard";
       loadDashboard(nextMode);
     });
   });
