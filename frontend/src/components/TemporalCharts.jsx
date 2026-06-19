@@ -68,7 +68,7 @@ export function renderTemporalInsights(temporalSummary) {
       ${row.map(val => {
         const intensity = maxVal > 0 ? val / maxVal : 0;
         const opacity = 0.1 + (intensity * 0.9);
-        const color = intensity > 0.7 ? "var(--danger)" : intensity > 0.4 ? "var(--blue-2)" : "var(--blue-3)";
+        const color = intensity > 0.7 ? "var(--red)" : intensity > 0.4 ? "var(--accent-2)" : "var(--accent)";
         return `<div class="grid-cell" style="background: ${color}; opacity: ${opacity}" title="${val} violations"></div>`;
       }).join("")}
     </div>

@@ -275,6 +275,7 @@ export function initDispatchView(hotspots, recommendations) {
                   <span>Hotspot Rank #${item.hotspot_rank}</span>
                 </div>
                 <div class="deployment-meta">
+                  <span>GPS <b>${Number(item.center_lat).toFixed(4)}, ${Number(item.center_lng).toFixed(4)}</b></span>
                   <span>Expected <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
                   <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
                 </div>
@@ -341,6 +342,7 @@ export function initDispatchView(hotspots, recommendations) {
               <span>${dayNames[item.day_of_week]} ${String(item.hour).padStart(2, "0")}:00</span>
             </div>
             <div class="deployment-meta">
+              <span>GPS <b>${Number(item.center_lat).toFixed(4)}, ${Number(item.center_lng).toFixed(4)}</b></span>
               <span>Expected <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
               <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
             </div>

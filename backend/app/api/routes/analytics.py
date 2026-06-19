@@ -135,7 +135,7 @@ def get_repeat_offenders(mode: str = "historical", limit: int = 10):
         station_count=("police_station", "nunique"),
     ).reset_index()
 
-    summary = summary[summary["total_violations"] > 1]
+    summary = summary[summary["total_violations"] >= 5]
     if summary.empty:
         return []
 
@@ -150,6 +150,6 @@ def get_repeat_offenders(mode: str = "historical", limit: int = 10):
 
     summary = summary.merge(vehicle_modes, on="final_vehicle_number", how="left")
     summary = summary.rename(columns={"final_vehicle_number": "vehicle_number"})
-    summary = summary.sort_values(by=["total_violations", "total_pici"], ascending=False).head(limit)
+    summary = summary.sort_values(by=["total_violations", "total_pici"], ascending=False)
     summary = summary.rename(columns={"final_vehicle_type": "vehicle_type"})
     return summary.to_dict(orient="records")
