@@ -1,6 +1,8 @@
-const MODES = [
+// Nav items: Historical mode, New Data / Upload mode, and Map view
+const NAV_ITEMS = [
   {
     id: "historical",
+    type: "mode",
     label: "Historical",
     icon: `
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -13,6 +15,7 @@ const MODES = [
   },
   {
     id: "new_data",
+    type: "mode",
     label: "New Data",
     icon: `
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -22,20 +25,48 @@ const MODES = [
       </svg>
     `,
   },
+  {
+    id: "map",
+    type: "view",
+    label: "Map",
+    icon: `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    `,
+  },
 ];
 
-export function renderNavbar(activeMode, isOpen = false) {
-  const buttons = MODES.map((mode) => `
-    <button
-      class="nav-item${activeMode === mode.id ? " is-active" : ""}"
-      type="button"
-      data-mode="${mode.id}"
-      aria-label="${mode.label} mode"
-    >
-      <span class="nav-icon">${mode.icon}</span>
-      <span class="nav-label">${mode.label}</span>
-    </button>
-  `).join("");
+// activeMode: "historical" | "new_data"
+// activeView: "dashboard" | "map"
+export function renderNavbar(activeMode, activeView, isOpen = false) {
+  const buttons = NAV_ITEMS.map((item) => {
+    // An item is "active" if:
+    //   - type=mode → its mode matches && we're in dashboard view
+    //   - type=view → we're in map view (only the map item)
+    const isActive =
+      item.type === "mode"
+        ? activeView === "dashboard" && activeMode === item.id
+        : activeView === "map";
+
+    const dataAttr =
+      item.type === "mode"
+        ? `data-mode="${item.id}"`
+        : `data-view="${item.id}"`;
+
+    return `
+      <button
+        class="nav-item${isActive ? " is-active" : ""}"
+        type="button"
+        ${dataAttr}
+        aria-label="${item.label}"
+      >
+        <span class="nav-icon">${item.icon}</span>
+        <span class="nav-label">${item.label}</span>
+      </button>
+    `;
+  }).join("");
 
   return `
     <nav class="side-nav${isOpen ? " is-open" : ""}" data-side-nav aria-label="Primary navigation">
@@ -43,10 +74,10 @@ export function renderNavbar(activeMode, isOpen = false) {
         <span class="brand-mark"></span>
         <div>
           <p>ParkSense AI</p>
-          <strong>Parking Enforcement Intelligence</strong>
+          <strong>Enforcement Intelligence</strong>
         </div>
       </div>
-      <div class="nav-items" role="group" aria-label="Dashboard mode">
+      <div class="nav-items" role="group" aria-label="Navigation">
         ${buttons}
       </div>
     </nav>

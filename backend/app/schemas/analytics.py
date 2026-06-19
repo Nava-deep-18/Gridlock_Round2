@@ -59,3 +59,10 @@ class VehicleSummary(BaseModel):
     vehicle_category: str
     total_violations: int
     total_pici: float
+
+class RepeatOffenderSummary(BaseModel):
+    vehicle_number: str
+    vehicle_type: str | None = None
+    total_violations: int
+    total_pici: float
+    station_count: int

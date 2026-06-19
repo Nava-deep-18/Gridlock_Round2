@@ -1,36 +1,76 @@
 import "./index.css";
 import { renderDashboard } from "./components/Dashboard.jsx";
+import { initMapView, renderMapPage } from "./components/MapView.jsx";
 import { renderNavbar } from "./components/Navbar.jsx";
 import { fetchJson, modePath, uploadCsv } from "./utils/apiClient.js";
 
 const root = document.getElementById("root");
 const state = {
-  mode: "historical",
+  mode: "historical",   // "historical" | "new_data"
+  view: "dashboard",    // "dashboard" | "map"
   isLoading: false,
   navOpen: false,
+  uploadMeta: readUploadMeta(),
 };
+
+function readUploadMeta() {
+  try {
+    return JSON.parse(localStorage.getItem("parksense.uploadMeta")) || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeUploadMeta(meta) {
+  state.uploadMeta = meta;
+  localStorage.setItem("parksense.uploadMeta", JSON.stringify(meta));
+}
+
+function formatProcessedTime(date = new Date()) {
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function parseApiError(error) {
+  try {
+    const parsed = JSON.parse(error.message);
+    return parsed.detail || error.message;
+  } catch {
+    return error.message;
+  }
+}
+
+async function fetchOptional(path, fallback) {
+  try {
+    return await fetchJson(path);
+  } catch {
+    return fallback;
+  }
+}
 
 function renderLoading() {
   root.innerHTML = `
     <main class="shell${state.navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(state.mode, state.navOpen)}
-      <section class="status-card">Loading ${state.mode === "historical" ? "historical" : "new data"} intelligence...</section>
+      ${renderNavbar(state.mode, state.view, state.navOpen)}
+      <section class="status-card">Loading ${state.mode === "historical" ? "historical" : "new data"} ${state.view === "map" ? "map" : "intelligence"}...</section>
     </main>
   `;
-  bindModeButtons();
+  bindNav();
 }
 
 function renderError(error) {
   root.innerHTML = `
     <main class="shell${state.navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(state.mode, state.navOpen)}
+      ${renderNavbar(state.mode, state.view, state.navOpen)}
       <section class="status-card error">
         <strong>Could not load dashboard data</strong>
         <span>${error.message}</span>
       </section>
     </main>
   `;
-  bindModeButtons();
+  bindNav();
 }
 
 async function loadDashboard(mode = state.mode) {
@@ -39,25 +79,47 @@ async function loadDashboard(mode = state.mode) {
   renderLoading();
 
   try {
-    const [health, stats, hotspots, recommendations, stationSummary] = await Promise.all([
-      fetchJson(modePath("/api/health", mode)),
-      fetchJson(modePath("/api/stats", mode)),
-      fetchJson(modePath("/api/hotspots", mode)),
-      fetchJson(modePath("/api/recommendations", mode)),
-      fetchJson(modePath("/api/summary/station", mode)),
-    ]);
+    if (state.view === "map") {
+      const heatmap = await fetchOptional(modePath("/api/heatmap?limit=2500", mode), []);
+      root.innerHTML = renderMapPage({
+        mode,
+        view: state.view,
+        navOpen: state.navOpen,
+      });
+      initMapView(heatmap);
+    } else {
+      const [
+        health, stats, hotspots, recommendations, stationSummary,
+        temporalSummary, vehicleSummary, repeatOffenders
+      ] = await Promise.all([
+        fetchJson(modePath("/api/health", mode)),
+        fetchJson(modePath("/api/stats", mode)),
+        fetchJson(modePath("/api/hotspots", mode)),
+        fetchJson(modePath("/api/recommendations", mode)),
+        fetchJson(modePath("/api/summary/station", mode)),
+        fetchOptional(modePath("/api/summary/temporal", mode), []),
+        fetchOptional(modePath("/api/summary/vehicle", mode), []),
+        fetchOptional(modePath("/api/summary/repeat-offenders", mode), []),
+      ]);
 
-    root.innerHTML = renderDashboard({
-      mode,
-      navOpen: state.navOpen,
-      health,
-      stats,
-      hotspots,
-      recommendations,
-      stationSummary,
-    });
-    bindModeButtons();
-    bindUploadForm();
+      root.innerHTML = renderDashboard({
+        mode,
+        view: state.view,
+        navOpen: state.navOpen,
+        uploadMeta: state.uploadMeta,
+        health,
+        stats,
+        hotspots,
+        recommendations,
+        stationSummary,
+        temporalSummary,
+        vehicleSummary,
+        repeatOffenders,
+      });
+      bindUploadForm();
+    }
+
+    bindNav();
   } catch (error) {
     renderError(error);
   } finally {
@@ -65,22 +127,37 @@ async function loadDashboard(mode = state.mode) {
   }
 }
 
-function bindModeButtons() {
+/**
+ * Binds ALL navigation interactions:
+ * - [data-mode] buttons → switch data mode, return to dashboard view
+ * - [data-view] buttons/links → switch view (map / dashboard)
+ * - [data-side-nav] → toggle sidebar expand
+ */
+function bindNav() {
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => {
       const nextMode = button.dataset.mode;
-      if (!nextMode || nextMode === state.mode || state.isLoading) {
-        return;
-      }
+      if (!nextMode || nextMode === state.mode || state.isLoading) return;
+      // If triggered from the navbar or map toggle, simply switch mode and stay in current view
+      // Unless they click the specific map button again
       loadDashboard(nextMode);
     });
   });
 
+  // View buttons (Map / back to dashboard)
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextView = button.dataset.view;
+      if (!nextView || nextView === state.view || state.isLoading) return;
+      state.view = nextView;
+      loadDashboard(state.mode);
+    });
+  });
+
+  // Sidebar toggle — only when clicking the nav background, not a button
   document.querySelectorAll("[data-side-nav]").forEach((nav) => {
     nav.addEventListener("click", (event) => {
-      if (event.target.closest("[data-mode]")) {
-        return;
-      }
+      if (event.target.closest("[data-mode]") || event.target.closest("[data-view]")) return;
       state.navOpen = !state.navOpen;
       nav.classList.toggle("is-open", state.navOpen);
       document.querySelector(".shell")?.classList.toggle("nav-pinned", state.navOpen);
@@ -90,26 +167,63 @@ function bindModeButtons() {
 
 function bindUploadForm() {
   const form = document.getElementById("upload-form");
-  if (!form) {
-    return;
-  }
+  if (!form) return;
+
+  const fileInput = document.getElementById("csv-file");
+  const fileName = document.getElementById("selected-file-name");
+  const button = document.getElementById("upload-button");
+  const status = document.getElementById("upload-status");
+
+  fileInput?.addEventListener("change", () => {
+    fileName.textContent = fileInput.files[0]?.name || "Choose a violation export";
+    status.innerHTML = "";
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const status = document.getElementById("upload-status");
-    const file = document.getElementById("csv-file").files[0];
+    const file = fileInput.files[0];
     if (!file) {
-      status.textContent = "Choose a CSV file first.";
+      status.innerHTML = `
+        <div class="upload-result is-error">
+          <strong>No file selected</strong>
+          <span>Choose a CSV export before processing New Data mode.</span>
+        </div>
+      `;
       return;
     }
 
-    status.textContent = "Processing upload...";
+    button.disabled = true;
+    button.textContent = "Processing...";
+    status.innerHTML = `
+      <div class="upload-result is-processing">
+        <strong>Processing ${file.name}</strong>
+        <span>Running validation, PICI scoring, hotspot clustering, and patrol-window generation.</span>
+      </div>
+    `;
+
     try {
       await uploadCsv(file);
-      status.textContent = "Upload processed. Switching to New Data mode...";
+      writeUploadMeta({
+        filename: file.name,
+        processedAt: formatProcessedTime(),
+      });
+      status.innerHTML = `
+        <div class="upload-result is-success">
+          <strong>Upload processed successfully</strong>
+          <span>${file.name} is now active in New Data mode.</span>
+        </div>
+      `;
       await loadDashboard("new_data");
     } catch (error) {
-      status.textContent = error.message;
+      status.innerHTML = `
+        <div class="upload-result is-error">
+          <strong>Upload failed</strong>
+          <span>${parseApiError(error)}</span>
+        </div>
+      `;
+    } finally {
+      button.disabled = false;
+      button.textContent = "Process Upload";
     }
   });
 }

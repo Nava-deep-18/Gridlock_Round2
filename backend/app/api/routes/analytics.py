@@ -12,6 +12,7 @@ from app.schemas.analytics import (
     StationSummary,
     TemporalSummary,
     VehicleSummary,
+    RepeatOffenderSummary,
 )
 from app.services.datasets import get_data_dir, load_parquet
 
@@ -106,4 +107,49 @@ def get_vehicle_summary(mode: str = "historical"):
     ).reset_index()
     
     summary = summary.sort_values(by="total_violations", ascending=False)
+    return summary.to_dict(orient="records")
+
+
+@router.get("/summary/repeat-offenders", response_model=List[RepeatOffenderSummary])
+def get_repeat_offenders(mode: str = "historical", limit: int = 10):
+    """Return anonymized vehicles with repeated violation activity."""
+    featured_path = get_data_dir(mode) / "featured_violations.parquet"
+    df = load_parquet(featured_path)
+
+    if "final_vehicle_number" not in df.columns:
+        return []
+
+    df = df[
+        [
+            "final_vehicle_number",
+            "final_vehicle_type",
+            "id",
+            "pici_score",
+            "police_station",
+        ]
+    ].copy()
+
+    summary = df.groupby("final_vehicle_number", sort=False).agg(
+        total_violations=("id", "count"),
+        total_pici=("pici_score", "sum"),
+        station_count=("police_station", "nunique"),
+    ).reset_index()
+
+    summary = summary[summary["total_violations"] > 1]
+    if summary.empty:
+        return []
+
+    vehicle_modes = (
+        df.groupby(["final_vehicle_number", "final_vehicle_type"], sort=False)
+        .size()
+        .reset_index(name="type_count")
+        .sort_values(["final_vehicle_number", "type_count"], ascending=[True, False])
+        .drop_duplicates("final_vehicle_number")
+        [["final_vehicle_number", "final_vehicle_type"]]
+    )
+
+    summary = summary.merge(vehicle_modes, on="final_vehicle_number", how="left")
+    summary = summary.rename(columns={"final_vehicle_number": "vehicle_number"})
+    summary = summary.sort_values(by=["total_violations", "total_pici"], ascending=False).head(limit)
+    summary = summary.rename(columns={"final_vehicle_type": "vehicle_type"})
     return summary.to_dict(orient="records")

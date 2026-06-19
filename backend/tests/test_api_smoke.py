@@ -23,6 +23,7 @@ class BackendApiSmokeTests(unittest.TestCase):
             "/api/summary/station",
             "/api/summary/temporal",
             "/api/summary/vehicle",
+            "/api/summary/repeat-offenders",
         ]
 
         for endpoint in endpoints:
