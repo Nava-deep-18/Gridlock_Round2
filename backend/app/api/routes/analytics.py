@@ -4,7 +4,15 @@ import pandas as pd
 from fastapi import APIRouter
 
 from app.core.config import settings
-from app.schemas.analytics import Hotspot, PatrolRecommendation, Stats
+from app.schemas.analytics import (
+    Hotspot,
+    PatrolRecommendation,
+    Stats,
+    HeatmapPoint,
+    StationSummary,
+    TemporalSummary,
+    VehicleSummary,
+)
 from app.services.datasets import get_data_dir, load_parquet
 
 router = APIRouter()
@@ -44,3 +52,58 @@ def get_stats(mode: str = "historical"):
         status="active",
         model_mae=3.427,
     )
+
+@router.get("/heatmap", response_model=List[HeatmapPoint])
+def get_heatmap(mode: str = "historical", limit: int = 10000):
+    """Return raw violation coordinates and PICI scores for the Leaflet heatmap."""
+    featured_path = get_data_dir(mode) / "featured_violations.parquet"
+    df = load_parquet(featured_path)
+    
+    # Sort by worst violations first to ensure the limit captures the most severe points
+    df = df.sort_values(by="pici_score", ascending=False).head(limit)
+    
+    # Rename columns to match HeatmapPoint schema
+    df = df[["latitude", "longitude", "pici_score"]].rename(
+        columns={"latitude": "lat", "longitude": "lng", "pici_score": "intensity"}
+    )
+    return df.to_dict(orient="records")
+
+
+@router.get("/summary/station", response_model=List[StationSummary])
+def get_station_summary(mode: str = "historical"):
+    """Return violation and PICI summaries grouped by police station."""
+    featured_path = get_data_dir(mode) / "featured_violations.parquet"
+    df = load_parquet(featured_path)
+    
+    summary = df.groupby("police_station").agg(
+        total_violations=("id", "count"),
+        total_pici=("pici_score", "sum")
+    ).reset_index()
+    
+    summary = summary.sort_values(by="total_pici", ascending=False)
+    return summary.to_dict(orient="records")
+
+
+@router.get("/summary/temporal", response_model=List[TemporalSummary])
+def get_temporal_summary(mode: str = "historical"):
+    """Return violation counts grouped by day of week and hour."""
+    clustered_path = get_data_dir(mode) / "clustered_violations.parquet"
+    df = load_parquet(clustered_path)
+    
+    summary = df.groupby(["day_of_week", "hour"]).size().reset_index(name="total_violations")
+    return summary.to_dict(orient="records")
+
+
+@router.get("/summary/vehicle", response_model=List[VehicleSummary])
+def get_vehicle_summary(mode: str = "historical"):
+    """Return violation counts and PICI grouped by vehicle category."""
+    featured_path = get_data_dir(mode) / "featured_violations.parquet"
+    df = load_parquet(featured_path)
+    
+    summary = df.groupby("vehicle_category").agg(
+        total_violations=("id", "count"),
+        total_pici=("pici_score", "sum")
+    ).reset_index()
+    
+    summary = summary.sort_values(by="total_violations", ascending=False)
+    return summary.to_dict(orient="records")

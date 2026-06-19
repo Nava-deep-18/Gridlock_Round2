@@ -38,3 +38,24 @@ class Stats(BaseModel):
     high_risk_patrol_windows: int
     status: str
     model_mae: float
+
+
+class HeatmapPoint(BaseModel):
+    lat: float
+    lng: float
+    intensity: float
+
+class StationSummary(BaseModel):
+    police_station: str
+    total_violations: int
+    total_pici: float
+
+class TemporalSummary(BaseModel):
+    day_of_week: int
+    hour: int
+    total_violations: int
+
+class VehicleSummary(BaseModel):
+    vehicle_category: str
+    total_violations: int
+    total_pici: float

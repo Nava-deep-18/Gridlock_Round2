@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 import json
 import ast
+import numpy as np
 
 SEVERITY_WEIGHTS = {
     'DOUBLE PARKING': 10,
@@ -59,10 +60,14 @@ HOLIDAYS = [
 
 def safe_load_list(value):
     """Parse JSON/list-like cells into a normalized list of uppercase strings."""
-    if isinstance(value, list):
+    if isinstance(value, (list, np.ndarray)):
         return [str(item).strip().upper() for item in value if pd.notna(item)]
-    if pd.isna(value):
-        return []
+    
+    try:
+        if pd.isna(value):
+            return []
+    except ValueError:
+        pass
 
     text = str(value).strip()
     if not text:
