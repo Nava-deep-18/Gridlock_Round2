@@ -199,7 +199,13 @@ def run_pipeline(mode: str = "historical"):
     featured_df = validate_featured(FEATURED_DATA)
     
     # 3. Clustering
-    cluster_hotspots(FEATURED_DATA, HOTSPOTS_DATA, CLUSTERED_DATA)
+    clustering_min_samples = 50 if mode == "historical" else 5
+    cluster_hotspots(
+        FEATURED_DATA,
+        HOTSPOTS_DATA,
+        CLUSTERED_DATA,
+        min_samples=clustering_min_samples,
+    )
     hotspots_df = validate_hotspots(HOTSPOTS_DATA)
     
     # 4. Temporal Prediction

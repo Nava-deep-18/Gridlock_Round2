@@ -9,6 +9,11 @@ export async function fetchJson(path) {
   return response.json();
 }
 
+export function modePath(path, mode) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}mode=${mode}`;
+}
+
 export async function uploadCsv(file) {
   const formData = new FormData();
   formData.append("file", file);

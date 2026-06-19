@@ -16,6 +16,8 @@ class Settings(BaseModel):
     hotspots_filename: str = "hotspots.parquet"
     patrols_filename: str = "patrol_recommendations.parquet"
     new_upload_filename: str = "new_violations.csv"
+    max_upload_size_bytes: int = 50 * 1024 * 1024
+    max_upload_rows: int = 50_000
 
 
 settings = Settings()

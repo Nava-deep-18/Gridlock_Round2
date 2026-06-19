@@ -15,7 +15,7 @@ def get_mode(series):
     modes = series.mode()
     return modes.iloc[0] if not modes.empty else None
 
-def cluster_hotspots(input_path: Path, hotspots_out: Path, clustered_out: Path):
+def cluster_hotspots(input_path: Path, hotspots_out: Path, clustered_out: Path, min_samples: int = 50):
     """Uses DBSCAN and Geospatial Medoids to identify chronic hotspots."""
     print("Clustering Hotspots...")
     df = pd.read_parquet(input_path)
@@ -24,11 +24,10 @@ def cluster_hotspots(input_path: Path, hotspots_out: Path, clustered_out: Path):
     coords_radians = np.radians(coords)
     EARTH_RADIUS_KM = 6371.0088
 
-    MIN_SAMPLES = 50
     EPSILON_METERS = 50
     eps_radians = (EPSILON_METERS / 1000.0) / EARTH_RADIUS_KM
 
-    dbscan = DBSCAN(eps=eps_radians, min_samples=MIN_SAMPLES, metric='haversine', algorithm='ball_tree', n_jobs=-1)
+    dbscan = DBSCAN(eps=eps_radians, min_samples=min_samples, metric='haversine', algorithm='ball_tree', n_jobs=-1)
     df['cluster_id'] = dbscan.fit_predict(coords_radians)
 
     df_hotspots_raw = df[df['cluster_id'] != -1]
@@ -190,6 +189,21 @@ def train_and_predict(clustered_path: Path, hotspots_path: Path, output_path: Pa
     # Logical Override (0.1 threshold)
     schedule_df.loc[schedule_df['predicted_violations'] < 0.1, 'predicted_pici'] = 0.0
     schedule_df['priority_score'] = schedule_df['predicted_violations'] * schedule_df['predicted_pici']
+
+    if schedule_df['priority_score'].max() <= 0:
+        observed_windows = df_hotspots.groupby(['hotspot_rank', 'day_of_week', 'hour']).agg(
+            fallback_violations=('id', 'count'),
+            fallback_pici=('pici_score', 'mean'),
+        ).reset_index()
+        schedule_df = schedule_df.drop(columns=['predicted_violations', 'predicted_pici', 'priority_score']).merge(
+            observed_windows,
+            on=['hotspot_rank', 'day_of_week', 'hour'],
+            how='left',
+        )
+        schedule_df['predicted_violations'] = schedule_df['fallback_violations'].fillna(0).astype(float)
+        schedule_df['predicted_pici'] = schedule_df['fallback_pici'].fillna(0).astype(float)
+        schedule_df['priority_score'] = schedule_df['predicted_violations'] * schedule_df['predicted_pici']
+        schedule_df = schedule_df.drop(columns=['fallback_violations', 'fallback_pici'])
 
     schedule_df = schedule_df.sort_values('priority_score', ascending=False).reset_index(drop=True)
     schedule_df.to_parquet(output_path, index=False)
