@@ -1228,6 +1228,30 @@ button[type="submit"]:disabled {
 }
 
 /* ─── Map Page ───────────────────────────────────────────────── */
+
+/* ─── Scrolling Containers ───────────────────────────────────── */
+.scrollable-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+/* Custom Scrollbar */
+.scrollable-container::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollable-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollable-container::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+.scrollable-container::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-2);
+}
 .page-header {
   margin-bottom: 24px;
 }

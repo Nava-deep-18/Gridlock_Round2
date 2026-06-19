@@ -7,7 +7,7 @@ function maskVehicleNumber(value) {
 }
 
 export function renderRepeatOffenders(repeatOffenders) {
-  const rows = repeatOffenders.slice(0, 10).map((item, index) => `
+  const rows = repeatOffenders.map((item, index) => `
     <li class="repeat-item">
       <div class="repeat-rank">${index + 1}</div>
       <div>
@@ -22,10 +22,12 @@ export function renderRepeatOffenders(repeatOffenders) {
     <article class="card repeat-card reveal-card">
       <div class="card-header">
         <span>Repeat Risk</span>
-        <strong>Top ${Math.min(repeatOffenders.length, 10)}</strong>
+        <strong>Total: ${repeatOffenders.length}</strong>
       </div>
       <h2>Repeat Offender Alerts</h2>
-      <ul class="repeat-list">${rows}</ul>
+      <div class="scrollable-container">
+        <ul class="repeat-list">${rows}</ul>
+      </div>
     </article>
   `;
 }

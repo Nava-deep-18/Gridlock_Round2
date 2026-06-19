@@ -1,6 +1,6 @@
 export function renderPatrolWindows(recommendations) {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const cards = recommendations.slice(0, 8).map((item, index) => `
+  const cards = recommendations.map((item, index) => `
     <li class="deployment-item">
       <div class="deployment-rank">${index + 1}</div>
       <div class="deployment-body">
@@ -24,7 +24,7 @@ export function renderPatrolWindows(recommendations) {
         <strong>Smart Windows</strong>
       </div>
       <h2>Deployment Recs</h2>
-      <ul class="deployment-list">${cards}</ul>
+      <ul class="deployment-list scrollable-container">${cards}</ul>
       <div class="deployment-cta">
         <span>Suggested by temporal violation probability model (MAE: 3.4)</span>
       </div>

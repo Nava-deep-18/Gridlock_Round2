@@ -1,7 +1,7 @@
 export function renderVehicleAnalysis(vehicleSummary) {
-  const topVehicles = vehicleSummary.slice(0, 6);
-  const maxViolations = Math.max(...topVehicles.map((item) => item.total_violations), 1);
-  const rows = topVehicles.map((item) => {
+  const allVehicles = vehicleSummary;
+  const maxViolations = Math.max(...allVehicles.map((item) => item.total_violations), 1);
+  const rows = allVehicles.map((item) => {
     const width = Math.max(5, Math.round((item.total_violations / maxViolations) * 100));
     return `
       <li>
@@ -19,10 +19,12 @@ export function renderVehicleAnalysis(vehicleSummary) {
     <article class="card vehicle-card reveal-card">
       <div class="card-header">
         <span>Vehicle Mix</span>
-        <strong>Impact profile</strong>
+        <strong>Total: ${allVehicles.length}</strong>
       </div>
       <h2>Vehicle Type Analysis</h2>
-      <ul class="vehicle-list">${rows}</ul>
+      <div class="scrollable-container">
+        <ul class="vehicle-list">${rows}</ul>
+      </div>
     </article>
   `;
 }

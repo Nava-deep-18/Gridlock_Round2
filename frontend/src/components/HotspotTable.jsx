@@ -1,5 +1,5 @@
 export function renderHotspotTable(hotspots) {
-  const rows = hotspots.slice(0, 15).map((item) => `
+  const rows = hotspots.map((item) => `
     <tr>
       <td><span class="rank-pill">${item.hotspot_rank}</span></td>
       <td>${item.primary_police_station || "Unknown"}</td>
@@ -14,13 +14,15 @@ export function renderHotspotTable(hotspots) {
     <article class="card table-card">
       <div class="card-header">
         <span>Hotspot Ranking</span>
-        <strong>Top ${Math.min(hotspots.length, 15)}</strong>
+        <strong>Total: ${hotspots.length}</strong>
       </div>
-      <h2>Top Chronic Hotspots</h2>
-      <table>
-        <thead><tr><th>Rank</th><th>Station</th><th>Violations</th><th>Total PICI</th><th>Avg PICI</th><th>Center</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
+      <h2>Chronic Hotspots</h2>
+      <div class="scrollable-container">
+        <table>
+          <thead><tr><th>Rank</th><th>Station</th><th>Violations</th><th>Total PICI</th><th>Avg PICI</th><th>Center</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
     </article>
   `;
 }

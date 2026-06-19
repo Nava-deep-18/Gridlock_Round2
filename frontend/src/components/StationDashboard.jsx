@@ -1,5 +1,5 @@
 export function renderStationDashboard(stationSummary) {
-  const topStations = stationSummary.slice(0, 10);
+  const topStations = stationSummary;
   const maxViolations = Math.max(...topStations.map((item) => item.total_violations), 1);
   const stations = topStations.map((item, index) => {
     const width = Math.max(6, Math.round((item.total_violations / maxViolations) * 100));
@@ -21,10 +21,10 @@ export function renderStationDashboard(stationSummary) {
     <article class="card station-card">
       <div class="card-header">
         <span>Station Load</span>
-        <strong>Top ${Math.min(stationSummary.length, 10)}</strong>
+        <strong>Total: ${stationSummary.length}</strong>
       </div>
       <h2>Highest Load Stations</h2>
-      <ul class="station-list">${stations}</ul>
+      <ul class="station-list scrollable-container">${stations}</ul>
     </article>
   `;
 }

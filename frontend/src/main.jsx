@@ -138,9 +138,15 @@ function bindNav() {
     button.addEventListener("click", () => {
       const nextMode = button.dataset.mode;
       if (!nextMode || state.isLoading) return;
-      if (nextMode === state.mode && state.view === "dashboard") return;
       
-      state.view = "dashboard";
+      // If switching mode from within the map view's header controls, keep the map view active
+      if (state.view === "map" && button.closest(".mode-toggle-group")) {
+        // Keep map view active
+      } else {
+        if (nextMode === state.mode && state.view === "dashboard") return;
+        state.view = "dashboard";
+      }
+      
       loadDashboard(nextMode);
     });
   });
