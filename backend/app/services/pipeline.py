@@ -1,8 +1,9 @@
 import shutil
 
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 
 from app.core.config import settings
+from src.data_pipeline import REQUIRED_RAW_COLUMNS
 from src.main import run_pipeline
 
 
@@ -27,13 +28,12 @@ def process_new_upload(file: UploadFile):
         import pandas as pd
         # Read just the first line (headers) to check for required columns
         headers = pd.read_csv(upload_path, nrows=0).columns
-        required_cols = {'latitude', 'longitude', 'violation_type'}
-        missing = required_cols - set(headers)
+        missing = REQUIRED_RAW_COLUMNS - set(headers)
         if missing:
             upload_path.unlink()
             raise HTTPException(
                 status_code=400, 
-                detail=f"Invalid schema. Missing required columns: {', '.join(missing)}"
+                detail=f"Invalid schema. Missing required columns: {', '.join(sorted(missing))}"
             )
     except pd.errors.EmptyDataError:
         upload_path.unlink()
