@@ -44,6 +44,7 @@ class HeatmapPoint(BaseModel):
     lat: float
     lng: float
     intensity: float
+    hour: int
 
 class StationSummary(BaseModel):
     police_station: str

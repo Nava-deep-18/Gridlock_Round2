@@ -82,7 +82,7 @@ async function loadDashboard(mode = state.mode) {
   try {
     if (state.view === "map") {
       const [heatmap, hotspots] = await Promise.all([
-        fetchOptional(modePath("/api/heatmap?limit=2500", mode), []),
+        fetchOptional(modePath("/api/heatmap?limit=10000", mode), []),
         fetchOptional(modePath("/api/hotspots", mode), []),
       ]);
       root.innerHTML = renderMapPage({
@@ -171,8 +171,14 @@ function bindNav() {
     button.addEventListener("click", () => {
       const nextView = button.dataset.view;
       if (!nextView || nextView === state.view || state.isLoading) return;
+      
+      let nextMode = state.mode;
+      if (nextView === "map") {
+        nextMode = "historical";
+      }
+      
       state.view = nextView;
-      loadDashboard(state.mode);
+      loadDashboard(nextMode);
     });
   });
 

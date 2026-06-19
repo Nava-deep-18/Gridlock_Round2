@@ -64,8 +64,8 @@ def get_heatmap(mode: str = "historical", limit: int = 10000):
     df = df.sort_values(by="pici_score", ascending=False).head(limit)
     
     # Rename columns to match HeatmapPoint schema
-    df = df[["latitude", "longitude", "pici_score"]].rename(
-        columns={"latitude": "lat", "longitude": "lng", "pici_score": "intensity"}
+    df = df[["latitude", "longitude", "pici_score", "hour"]].rename(
+        columns={"latitude": "lat", "longitude": "lng", "pici_score": "intensity", "hour": "hour"}
     )
     return df.to_dict(orient="records")
 

@@ -12,13 +12,85 @@ function renderMapContainer() {
     <div class="map-container full-page-map">
       <div id="enforcement-map"></div>
       <div class="map-overlay">
-        <div class="legend">
+        <!-- Legend -->
+        <div class="legend" style="margin-bottom: 12px;">
           <h4>Congestion Impact (PICI)</h4>
-          <div class="legend-scale">
-            <span style="background: #0000ff">Low</span>
-            <span style="background: #00c800">Med</span>
-            <span style="background: #ffff00; color: #333">High</span>
-            <span style="background: #ff0000">Crit</span>
+          <div class="legend-scale" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5px; border-radius: 4px; overflow: hidden;">
+            <div style="background: #0000ff; padding: 4px; text-align: center; color: white;">
+              <span style="font-size: 9px; font-weight: 700; display: block;">Low</span>
+              <div style="font-size: 8px; opacity: 0.85;">&lt;0.4</div>
+            </div>
+            <div style="background: #00c800; padding: 4px; text-align: center; color: black;">
+              <span style="font-size: 9px; font-weight: 700; display: block;">Med</span>
+              <div style="font-size: 8px; opacity: 0.85;">0.4-0.6</div>
+            </div>
+            <div style="background: #ffff00; padding: 4px; text-align: center; color: black;">
+              <span style="font-size: 9px; font-weight: 700; display: block;">High</span>
+              <div style="font-size: 8px; opacity: 0.85;">0.6-0.9</div>
+            </div>
+            <div style="background: #ff0000; padding: 4px; text-align: center; color: white;">
+              <span style="font-size: 9px; font-weight: 700; display: block;">Crit</span>
+              <div style="font-size: 8px; opacity: 0.85;">&ge;1.0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Travel Slider -->
+        <div class="time-slider-card" style="
+          background: rgba(18, 18, 28, 0.85);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--border-strong);
+          border-radius: 8px;
+          padding: 14px;
+          width: 260px;
+          box-shadow: var(--shadow);
+          display: grid;
+          gap: 10px;
+          pointer-events: auto;
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em;">
+              Time-Travel Slider
+            </h4>
+            <span id="slider-time-label" style="font-size: 11px; font-weight: 800; color: var(--text); background: var(--surface-3); padding: 2px 6px; border-radius: 4px;">
+              10:00 AM
+            </span>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="slider-play-btn" type="button" style="
+              background: var(--accent);
+              color: var(--text);
+              border: none;
+              width: 28px;
+              height: 28px;
+              border-radius: 50%;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 10px;
+              transition: all 120ms;
+            ">
+              <!-- Play Icon SVG -->
+              <svg id="play-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <!-- Pause Icon SVG (hidden initially) -->
+              <svg id="pause-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            
+            <input id="time-range-slider" type="range" min="0" max="14" value="10" style="
+              flex: 1;
+              cursor: pointer;
+              accent-color: var(--accent-2);
+            " />
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); font-weight: 700;">
+            <span>12 AM</span>
+            <span>4 AM</span>
+            <span>8 AM</span>
+            <span>12 PM</span>
+            <span>2 PM</span>
           </div>
         </div>
       </div>
@@ -81,14 +153,14 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
     maxZoom: 19,
   }).addTo(map);
 
-  // Render Heatmap overlay
+  // Initialize Heatmap layer reference
+  let heatLayer = null;
   if (points && points.length > 0) {
-    const heatData = points.map((p) => [p.lat, p.lng, p.intensity]);
-    L.heatLayer(heatData, {
+    heatLayer = L.heatLayer([], {
       radius: 20,
       blur: 15,
       maxZoom: 17,
-      max: 8.0,
+      max: 1.0,
       gradient: { 0.4: "blue", 0.6: "lime", 0.75: "yellow", 0.9: "orange", 1.0: "red" },
     }).addTo(map);
 
@@ -178,6 +250,61 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
 
     map.on("zoomend", updateMarkersVisibility);
     updateMarkersVisibility();
+  }
+
+  // Bind Time-Travel Slider Interactions
+  const timeSlider = document.getElementById("time-range-slider");
+  const timeLabel = document.getElementById("slider-time-label");
+  const playBtn = document.getElementById("slider-play-btn");
+  const playIcon = document.getElementById("play-icon");
+  const pauseIcon = document.getElementById("pause-icon");
+
+  if (timeSlider && timeLabel && heatLayer) {
+    let playInterval = null;
+
+    function updateHeatmapForHour(hour) {
+      const ampm = hour >= 12 ? "PM" : "AM";
+      const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+      timeLabel.textContent = `${String(displayHour).padStart(2, "0")}:00 ${ampm}`;
+
+      const filtered = points.filter((p) => p.hour === hour);
+      const heatData = filtered.map((p) => [p.lat, p.lng, p.intensity]);
+      heatLayer.setLatLngs(heatData);
+    }
+
+    // Handle slider change
+    timeSlider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value);
+      updateHeatmapForHour(val);
+    });
+
+    // Play / Pause Animation Loop
+    playBtn?.addEventListener("click", () => {
+      if (playInterval) {
+        // Pause
+        clearInterval(playInterval);
+        playInterval = null;
+        playIcon.style.display = "block";
+        pauseIcon.style.display = "none";
+      } else {
+        // Play
+        playIcon.style.display = "none";
+        pauseIcon.style.display = "block";
+        playInterval = setInterval(() => {
+          const sliderEl = document.getElementById("time-range-slider");
+          if (!sliderEl) {
+            clearInterval(playInterval);
+            return;
+          }
+          let nextHour = (parseInt(sliderEl.value) + 1) % 15;
+          sliderEl.value = nextHour;
+          updateHeatmapForHour(nextHour);
+        }, 800); // Pulse every 800ms
+      }
+    });
+
+    // Set initial value
+    updateHeatmapForHour(parseInt(timeSlider.value));
   }
 
   return map;
