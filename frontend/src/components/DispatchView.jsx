@@ -180,6 +180,28 @@ export function initDispatchView(hotspots, recommendations, mode = "historical")
  
   if (!stationSelect || !daySelect || !startSelect || !endSelect || !stationRecsList || !calendarGridBody || !modal) return;
 
+  // Retrieve dispatched list from localStorage
+  let dispatchedKeys = new Set();
+  try {
+    const saved = localStorage.getItem("parksense.dispatched_patrols");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        dispatchedKeys = new Set(parsed);
+      }
+    }
+  } catch (e) {
+    console.error("Error reading dispatched patrols", e);
+  }
+
+  function saveDispatchedKeys() {
+    try {
+      localStorage.setItem("parksense.dispatched_patrols", JSON.stringify(Array.from(dispatchedKeys)));
+    } catch (e) {
+      console.error("Error saving dispatched patrols", e);
+    }
+  }
+
   const isHistorical = mode === "historical";
   const startHourLimit = 0;
   const endHourLimit = isHistorical ? 14 : 23;
@@ -306,26 +328,49 @@ export function initDispatchView(hotspots, recommendations, mode = "historical")
         if (filtered.length === 0) {
           modalRecsList.innerHTML = `<li class="status-card" style="padding:20px;text-align:center;color:var(--text-2)">No recommendations scheduled for this hour.</li>`;
         } else {
-          modalRecsList.innerHTML = filtered.map((item, index) => `
-            <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(3)}">
-              <div class="deployment-rank">#${index + 1}</div>
-              <div class="deployment-body">
-                <div class="deployment-topline">
-                  <strong>${item.police_station} Area</strong>
-                  <span>Hotspot Rank #${item.hotspot_rank}</span>
+          modalRecsList.innerHTML = filtered.map((item, index) => {
+            const key = `${item.police_station}_${item.day_of_week}_${item.hour}`;
+            const isDispatched = dispatchedKeys.has(key);
+            const isDispatchedClass = isDispatched ? "is-dispatched" : "";
+            
+            const deployButtonHtml = `
+              <button class="deploy-btn ${isDispatchedClass}" 
+                      data-key="${key}"
+                      data-station="${item.police_station}"
+                      data-day="${dayNames[item.day_of_week]}"
+                      data-hour="${item.hour}"
+                      data-score="${item.priority_score}">
+                <span class="btn-text-normal">Deploy Patrol</span>
+                <span class="btn-text-dispatched">✓ Dispatched</span>
+                <span class="btn-text-hover">Recall Patrol</span>
+                <span class="btn-text-loading">Deploying...</span>
+              </button>
+            `;
+
+            return `
+              <li class="deployment-item ${isDispatchedClass}" title="Priority Score: ${Number(item.priority_score).toFixed(3)}">
+                <div class="deployment-rank">#${index + 1}</div>
+                <div class="deployment-body">
+                  <div class="deployment-topline">
+                    <strong>${item.police_station} Area</strong>
+                    <span>Hotspot Rank #${item.hotspot_rank}</span>
+                  </div>
+                  <div class="deployment-meta">
+                    <span>GPS <b>${Number(item.center_lat).toFixed(4)}, ${Number(item.center_lng).toFixed(4)}</b></span>
+                    <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
+                    <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
+                  </div>
                 </div>
-                <div class="deployment-meta">
-                  <span>GPS <b>${Number(item.center_lat).toFixed(4)}, ${Number(item.center_lng).toFixed(4)}</b></span>
-                  <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
-                  <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 110px;">
+                  <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                    <span style="font-size: 8px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Priority</span>
+                    <div class="priority-score" style="margin-top: -2px;">${formatPriorityScore(item.priority_score)}</div>
+                  </div>
+                  ${deployButtonHtml}
                 </div>
-              </div>
-              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 90px;">
-                <span style="font-size: 8px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Priority</span>
-                <div class="priority-score" style="margin-top: -2px;">${formatPriorityScore(item.priority_score)}</div>
-              </div>
-            </li>
-          `).join("");
+              </li>
+            `;
+          }).join("");
         }
 
         modal.style.display = "flex";
@@ -382,8 +427,26 @@ export function initDispatchView(hotspots, recommendations, mode = "historical")
     }
 
     const html = filtered.map((item) => {
+      const key = `${item.police_station}_${item.day_of_week}_${item.hour}`;
+      const isDispatched = dispatchedKeys.has(key);
+      const isDispatchedClass = isDispatched ? "is-dispatched" : "";
+      
+      const deployButtonHtml = `
+        <button class="deploy-btn ${isDispatchedClass}" 
+                data-key="${key}"
+                data-station="${item.police_station}"
+                data-day="${dayNames[item.day_of_week]}"
+                data-hour="${item.hour}"
+                data-score="${item.priority_score}">
+          <span class="btn-text-normal">Deploy Patrol</span>
+          <span class="btn-text-dispatched">✓ Dispatched</span>
+          <span class="btn-text-hover">Recall Patrol</span>
+          <span class="btn-text-loading">Deploying...</span>
+        </button>
+      `;
+
       return `
-        <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected Violations ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
+        <li class="deployment-item ${isDispatchedClass}" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected Violations ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
           <div class="deployment-rank">#${item.hotspot_rank}</div>
           <div class="deployment-body">
             <div class="deployment-topline">
@@ -396,9 +459,12 @@ export function initDispatchView(hotspots, recommendations, mode = "historical")
               <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
             </div>
           </div>
-          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 90px;">
-            <span style="font-size: 8px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Priority</span>
-            <div class="priority-score" style="margin-top: -2px;">${formatPriorityScore(item.priority_score)}</div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 110px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+              <span style="font-size: 8px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Priority</span>
+              <div class="priority-score">${formatPriorityScore(item.priority_score)}</div>
+            </div>
+            ${deployButtonHtml}
           </div>
         </li>
       `;
@@ -410,6 +476,122 @@ export function initDispatchView(hotspots, recommendations, mode = "historical")
   // Initial render
   updateCalendarGrid();
   updateStationRecs();
+
+  // Slide-in Toast helper
+  function showToast(message, type = "success") {
+    let container = document.getElementById("toast-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "toast-container";
+      container.style.cssText = `
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 9999;
+        display: grid;
+        gap: 10px;
+        pointer-events: none;
+      `;
+      document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement("div");
+    toast.className = "toast-notification";
+    
+    const borderColor = type === "success" ? "var(--green)" : "var(--red)";
+    const icon = type === "success" ? "🚨" : "↩️";
+    
+    toast.style.cssText = `
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-left: 4px solid ${borderColor};
+      color: var(--text);
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      pointer-events: auto;
+    `;
+    toast.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:16px;">${icon}</span>
+        <div>${message}</div>
+      </div>
+      <button class="toast-close" style="background:none; border:none; color:var(--text-2); cursor:pointer; font-size:16px; line-height:1; font-weight:700;">&times;</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    toast.querySelector(".toast-close").addEventListener("click", () => {
+      toast.style.animation = "slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards";
+      setTimeout(() => toast.remove(), 300);
+    });
+    
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.animation = "slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards";
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 4500);
+  }
+
+  function handleDeployClick(event) {
+    const button = event.target.closest(".deploy-btn");
+    if (!button) return;
+
+    const key = button.dataset.key;
+    const station = button.dataset.station;
+    const day = button.dataset.day;
+    const hourVal = parseInt(button.dataset.hour);
+    const score = button.dataset.score;
+    const itemCard = button.closest(".deployment-item");
+
+    function getLocalHourLabel(h) {
+      if (h === 0) return "12 AM";
+      if (h === 12) return "12 PM";
+      const ampm = h >= 12 ? "PM" : "AM";
+      const displayH = h % 12 === 0 ? 12 : h % 12;
+      return `${displayH} ${ampm}`;
+    }
+
+    if (dispatchedKeys.has(key)) {
+      // Recall action
+      dispatchedKeys.delete(key);
+      saveDispatchedKeys();
+
+      // UI Updates for all matching buttons in view
+      document.querySelectorAll(`.deploy-btn[data-key="${key}"]`).forEach(btn => {
+        btn.classList.remove("is-dispatched");
+        btn.closest(".deployment-item")?.classList.remove("is-dispatched");
+      });
+
+      showToast(`Patrol Recalled: ${station} Area | ${day} ${getLocalHourLabel(hourVal)} | Unit returned to station`, "info");
+    } else {
+      // Deploy action
+      button.classList.add("is-loading");
+
+      setTimeout(() => {
+        button.classList.remove("is-loading");
+        dispatchedKeys.add(key);
+        saveDispatchedKeys();
+
+        // UI Updates for all matching buttons in view
+        document.querySelectorAll(`.deploy-btn[data-key="${key}"]`).forEach(btn => {
+          btn.classList.add("is-dispatched");
+          btn.closest(".deployment-item")?.classList.add("is-dispatched");
+        });
+
+        showToast(`Patrol Deployed: ${station} Area | ${day} ${getLocalHourLabel(hourVal)} | Priority Score: ${Number(score).toFixed(2)}`, "success");
+      }, 500);
+    }
+  }
+
+  stationRecsList.addEventListener("click", handleDeployClick);
+  modalRecsList.addEventListener("click", handleDeployClick);
 
   // Modal close handlers
   closeModalBtn.addEventListener("click", () => {
