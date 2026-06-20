@@ -1533,3 +1533,27 @@ button[type="submit"]:disabled {
   display: inline-flex;
 }
 
+/* ─── Map Toggle Switch ──────────────────────────────────────── */
+.map-switch input:checked + .map-slider {
+  background-color: var(--accent) !important;
+  border-color: var(--accent-2) !important;
+}
+
+.map-switch input:checked + .map-slider:before {
+  transform: translateX(20px) !important;
+  background-color: var(--text) !important;
+}
+
+.map-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--muted);
+  transition: .3s;
+  border-radius: 50%;
+}
+
+

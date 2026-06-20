@@ -51,6 +51,48 @@ function renderMapContainer(mode) {
           </div>
         </div>
 
+        <!-- Before/After Impact Toggle Card -->
+        <div class="simulation-toggle-card" style="
+          background: rgba(18, 18, 28, 0.85);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--border-strong);
+          border-radius: 8px;
+          padding: 14px;
+          width: 260px;
+          box-shadow: var(--shadow);
+          display: grid;
+          gap: 8px;
+          pointer-events: auto;
+          margin-bottom: 12px;
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em;">
+              Enforcement Relief
+            </h4>
+            <span style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,0.05); padding: 2px 5px; border-radius: 4px;">
+              Simulation
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-2);">Top 50 Hotspots Relief</span>
+            <label class="map-switch" style="position: relative; display: inline-block; width: 42px; height: 20px; cursor: pointer;">
+              <input type="checkbox" id="impact-sim-toggle" style="opacity: 0; width: 0; height: 0;" />
+              <span class="map-slider" style="
+                position: absolute;
+                cursor: pointer;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background-color: var(--surface-3);
+                transition: .3s;
+                border-radius: 20px;
+                border: 1px solid var(--border-strong);
+              "></span>
+            </label>
+          </div>
+          <p style="font-size: 10px; color: var(--muted); margin: 2px 0 0 0; line-height: 1.35;">
+            Toggle to simulate traffic relief if patrols resolve Bangalore's top 50 chronic violations.
+          </p>
+        </div>
+
         <!-- Time Travel Slider -->
         <div class="time-slider-card" style="
           background: rgba(18, 18, 28, 0.85);
@@ -152,6 +194,50 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
   const mapElement = document.getElementById("enforcement-map");
   if (!mapElement) return null;
 
+  let simulationActive = false;
+  const hotspotMarkers = [];
+
+  // Extract top 50 hotspots center coordinates for simulation filtering
+  const top50Hotspots = hotspots
+    .filter(h => h.hotspot_rank <= 50)
+    .map(h => ({
+      lat: Number(h.center_lat || h.mean_lat),
+      lng: Number(h.center_lng || h.mean_lng)
+    }))
+    .filter(h => !isNaN(h.lat) && !isNaN(h.lng));
+
+  function isNearTop50(pLat, pLng) {
+    const thresholdSq = 0.0035 * 0.0035; // ~350 meters radius to show clear visual impact at zoom 13
+    for (let i = 0; i < top50Hotspots.length; i++) {
+      const h = top50Hotspots[i];
+      const dLat = pLat - h.lat;
+      const dLng = pLng - h.lng;
+      const distSq = dLat * dLat + dLng * dLng;
+      if (distSq < thresholdSq) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function updateMarkerStyles() {
+    hotspotMarkers.forEach(marker => {
+      const isTop50 = marker.hotspot_rank <= 50;
+      const element = marker.getElement()?.querySelector("div");
+      if (element) {
+        if (simulationActive && isTop50) {
+          element.style.borderColor = "#22c55e";
+          element.style.opacity = "0.35";
+          element.style.boxShadow = "none";
+        } else {
+          element.style.borderColor = "#f43f5e";
+          element.style.opacity = "1.0";
+          element.style.boxShadow = "0 0 5px rgba(244, 63, 94, 0.6)";
+        }
+      }
+    });
+  }
+
   // Let's set a higher default zoom of 13.5 so the initial view is closer
   const map = L.map("enforcement-map", {
     center: [12.9716, 77.5946], // Bengaluru centre
@@ -243,6 +329,7 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
       `;
       marker.bindPopup(popupHtml);
       marker.addTo(markersGroup);
+      hotspotMarkers.push(marker);
     });
 
     // Control visibility based on zoom level (show only at zoom >= 14)
@@ -253,6 +340,7 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
         if (!map.hasLayer(markersGroup)) {
           map.addLayer(markersGroup);
         }
+        setTimeout(updateMarkerStyles, 10);
       } else {
         if (map.hasLayer(markersGroup)) {
           map.removeLayer(markersGroup);
@@ -270,6 +358,7 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
   const playBtn = document.getElementById("slider-play-btn");
   const playIcon = document.getElementById("play-icon");
   const pauseIcon = document.getElementById("pause-icon");
+  const simToggle = document.getElementById("impact-sim-toggle");
 
   if (timeSlider && timeLabel && heatLayer) {
     let playInterval = null;
@@ -279,10 +368,20 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
       const displayHour = hour % 12 === 0 ? 12 : hour % 12;
       timeLabel.textContent = `${String(displayHour).padStart(2, "0")}:00 ${ampm}`;
 
-      const filtered = points.filter((p) => p.hour === hour);
+      let filtered = points.filter((p) => p.hour === hour);
+      if (simulationActive) {
+        filtered = filtered.filter(p => !isNearTop50(p.lat, p.lng));
+      }
       const heatData = filtered.map((p) => [p.lat, p.lng, p.intensity]);
       heatLayer.setLatLngs(heatData);
+      heatLayer.redraw(); // Force canvas redraw to ensure immediate visual updates
     }
+
+    simToggle?.addEventListener("change", (e) => {
+      simulationActive = e.target.checked;
+      updateMarkerStyles();
+      updateHeatmapForHour(parseInt(timeSlider.value));
+    });
 
     // Handle slider change
     timeSlider.addEventListener("input", (e) => {
