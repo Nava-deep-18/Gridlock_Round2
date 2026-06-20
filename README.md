@@ -172,9 +172,12 @@ If no mode is supplied, the backend defaults to `historical`.
 ### Health
 
 ```http
+GET /api/ping
 GET /api/health
 GET /api/health?mode=new_data
 ```
+
+`/api/ping` is a lightweight liveness endpoint for uptime checks and keep-awake monitors.
 
 Checks whether the required processed datasets exist, are readable, and contain valid signal columns.
 
@@ -366,6 +369,23 @@ The Vite dev server proxies `/api` requests to:
 ```text
 http://localhost:8000
 ```
+
+## Render Keep-Awake Monitoring
+
+Render free instances can spin down after inactivity. To keep the backend warm, create an UptimeRobot HTTP monitor against the lightweight ping endpoint:
+
+```text
+https://<your-render-service>.onrender.com/api/ping
+```
+
+Recommended UptimeRobot settings:
+
+- Monitor Type: HTTP(s)
+- URL: the deployed Render backend URL plus `/api/ping`
+- Monitoring Interval: 5 minutes
+- Expected status: any 2xx response
+
+Use `/api/ping` for keep-awake checks. Use `/api/health` only when you want dataset diagnostics, because it reads the processed data files.
 
 ## Demo Flow
 

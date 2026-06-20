@@ -15,6 +15,7 @@ class BackendApiSmokeTests(unittest.TestCase):
 
     def test_historical_endpoints_are_available(self):
         endpoints = [
+            "/api/ping",
             "/api/health",
             "/api/stats",
             "/api/hotspots",
@@ -30,6 +31,10 @@ class BackendApiSmokeTests(unittest.TestCase):
             with self.subTest(endpoint=endpoint):
                 response = self.client.get(endpoint)
                 self.assertEqual(response.status_code, 200, response.text)
+
+    def test_ping_allows_head_requests(self):
+        response = self.client.head("/api/ping")
+        self.assertEqual(response.status_code, 200, response.text)
 
     def test_upload_reprocesses_sample_data(self):
         sample_path = self.repo_root / "sample_data" / "sample_upload.csv"
