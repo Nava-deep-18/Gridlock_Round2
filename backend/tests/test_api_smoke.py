@@ -15,6 +15,7 @@ class BackendApiSmokeTests(unittest.TestCase):
 
     def test_historical_endpoints_are_available(self):
         endpoints = [
+            "/api/ping",
             "/api/health",
             "/api/stats",
             "/api/hotspots",

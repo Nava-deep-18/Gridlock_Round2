@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
+class PingResponse(BaseModel):
+    status: str
+
+
 class DatasetHealth(BaseModel):
     ok: bool
     path: str
