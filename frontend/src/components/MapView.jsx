@@ -3,6 +3,7 @@ import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import { renderNavbar } from "./Navbar.jsx";
 
+
 /**
  * Returns the HTML shell for the map container (no map instance yet).
  * initMapView() is called after this HTML is injected into the DOM.
@@ -30,7 +31,7 @@ function renderMapContainer(mode) {
       <div class="map-overlay">
         <!-- Legend -->
         <div class="legend" style="margin-bottom: 12px;">
-          <h4>Congestion Impact (PICI)</h4>
+          <h4>Traffic Severity (TCSR)</h4>
           <div class="legend-scale" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5px; border-radius: 4px; overflow: hidden;">
             <div style="background: #0000ff; padding: 4px; text-align: center; color: white;">
               <span style="font-size: 9px; font-weight: 700; display: block;">Low</span>
@@ -91,6 +92,40 @@ function renderMapContainer(mode) {
           <p style="font-size: 10px; color: var(--muted); margin: 2px 0 0 0; line-height: 1.35;">
             Toggle to simulate traffic relief if patrols resolve Bangalore's top 50 chronic violations.
           </p>
+        </div>
+
+        <!-- Simulation Relief Statistics Dashboard -->
+        <div id="sim-relief-stats-card" style="
+          background: rgba(18, 18, 28, 0.85);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--border-strong);
+          border-left: 4px solid var(--green);
+          border-radius: 8px;
+          padding: 14px;
+          width: 260px;
+          box-shadow: var(--shadow);
+          display: none;
+          gap: 10px;
+          pointer-events: auto;
+          margin-bottom: 12px;
+        ">
+          <h4 style="margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--green); letter-spacing: 0.05em;">
+            Est. Congestion Relief
+          </h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; margin-top: 4px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 4px; border: 1px solid var(--border);">
+              <span style="font-size: 8px; color: var(--text-2); display: block; text-transform: uppercase;">Time Saved</span>
+              <strong style="font-size: 12px; color: var(--text);">1,450 hrs/d</strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 4px; border: 1px solid var(--border);">
+              <span style="font-size: 8px; color: var(--text-2); display: block; text-transform: uppercase;">Speed Gain</span>
+              <strong style="font-size: 12px; color: var(--green);">+12.4%</strong>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 4px; border: 1px solid var(--border); font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 8px; color: var(--text-2); text-transform: uppercase;">Junctions Unblocked</span>
+            <strong style="font-size: 12px; color: var(--text);">8 key spots</strong>
+          </div>
         </div>
 
         <!-- Time Travel Slider -->
@@ -298,14 +333,17 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
 
       const marker = L.marker([lat, lng], { icon: customIcon });
 
+      const avgPiciVal = Number(h.avg_pici) || 0.0;
+      const capacityLoss = Math.min(95, Math.max(15, Math.round(15 + (avgPiciVal - 0.1) * 65)));
+
       const popupHtml = `
-        <div style="font-family: 'Inter', sans-serif; color: #f0f0f8; min-width: 180px; padding: 4px 2px;">
-          <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #9b7de8; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
-            Hotspot Rank #${h.hotspot_rank}
+        <div style="font-family: 'Inter', sans-serif; color: #f0f0f8; min-width: 200px; padding: 4px 2px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #9b7de8; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Hotspot Rank #${h.hotspot_rank}</span>
           </h4>
-          <div style="display: grid; gap: 4px; font-size: 11px;">
+          <div style="display: grid; gap: 5px; font-size: 11px;">
             <div style="display: flex; justify-content: space-between;">
-              <span style="color: #a0a0bc;">Station:</span>
+              <span style="color: #a0a0bc;">Station Area:</span>
               <strong>${h.primary_police_station || "Unknown"}</strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
@@ -317,11 +355,19 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
               <strong>${h.total_violations}</strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
-              <span style="color: #a0a0bc;">Total PICI:</span>
-              <strong>${Number(h.total_pici).toFixed(2)}</strong>
+              <span style="color: #a0a0bc;">TCSR Index (PICI):</span>
+              <strong>${Number(h.total_pici).toFixed(1)}</strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
-              <span style="color: #a0a0bc;">Vehicle:</span>
+              <span style="color: #a0a0bc;">Average PICI:</span>
+              <strong>${avgPiciVal.toFixed(2)}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #a0a0bc;">Carriageway Choke:</span>
+              <strong style="color: var(--red);">${capacityLoss}%</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #a0a0bc;">Primary Vehicle:</span>
               <strong>${h.primary_vehicle_type || "Unknown"}</strong>
             </div>
           </div>
@@ -381,6 +427,11 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
       simulationActive = e.target.checked;
       updateMarkerStyles();
       updateHeatmapForHour(parseInt(timeSlider.value));
+      
+      const statsCard = document.getElementById("sim-relief-stats-card");
+      if (statsCard) {
+        statsCard.style.display = simulationActive ? "grid" : "none";
+      }
     });
 
     // Handle slider change

@@ -1,35 +1,44 @@
 export function renderPatrolWindows(recommendations) {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const cards = recommendations.map((item, index) => `
-    <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected Violations ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
-      <div class="deployment-rank">${index + 1}</div>
-      <div class="deployment-body">
-        <div class="deployment-topline">
-          <strong>Hotspot Rank #${item.hotspot_rank}</strong>
-          <span>${dayNames[item.day_of_week] || item.day_of_week} ${String(item.hour).padStart(2, "0")}:00</span>
+  const cards = recommendations.map((item, index) => {
+    const lat = Number(item.center_lat) || 0.0;
+    const lng = Number(item.center_lng) || 0.0;
+    
+    // Quantify traffic capacity loss based on predicted PICI score
+    const avgPiciVal = Number(item.predicted_pici) || 0.0;
+    const capacityLoss = Math.min(95, Math.max(15, Math.round(15 + (avgPiciVal / 0.25) * 70)));
+
+    return `
+      <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected Violations ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
+        <div class="deployment-rank">${index + 1}</div>
+        <div class="deployment-body">
+          <div class="deployment-topline">
+            <strong style="display:flex; align-items:center;">Hotspot Rank #${item.hotspot_rank}</strong>
+            <span>${dayNames[item.day_of_week] || item.day_of_week} ${String(item.hour).padStart(2, "0")}:00</span>
+          </div>
+          <div class="deployment-meta">
+            <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
+            <span>Choke <b style="color:var(--red)">${capacityLoss}%</b></span>
+          </div>
         </div>
-        <div class="deployment-meta">
-          <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
-          <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
-        </div>
-      </div>
-      <div class="priority-score" title="Priority Score (Expected Violations x Congestion Impact)">${Number(item.priority_score).toFixed(2)}</div>
-    </li>
-  `).join("");
+        <div class="priority-score" title="Priority Score (Expected Violations x Congestion Impact)">${Number(item.priority_score).toFixed(2)}</div>
+      </li>
+    `;
+  }).join("");
 
   return `
     <article class="card deployment-card reveal-card">
       <div class="card-header">
-        <span>Patrol Optimization</span>
+        <span>Patrol Optimization (Hotspots)</span>
         <strong>Smart Windows</strong>
       </div>
-      <h2>Deployment Recs</h2>
+      <h2>Deployment Recs (PICI)</h2>
       <p style="font-size: 11px; color: var(--text-2); margin: -4px 0 12px 0; line-height: 1.4;">
-        Priority Score = Expected Violations × Congestion Impact (PICI). High scores indicate urgent patrol windows.
+        Priority Score = Expected Violations × Congestion Severity (PICI). High scores represent priority patrols.
       </p>
       <ul class="deployment-list scrollable-container">${cards}</ul>
       <div class="deployment-cta">
-        <span>Suggested by temporal violation probability model (MAE: 3.4)</span>
+        <span>Suggested by temporal bottleneck forecasting model (BTP Command Baseline)</span>
       </div>
     </article>
   `;

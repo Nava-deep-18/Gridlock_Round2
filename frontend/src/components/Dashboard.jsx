@@ -35,6 +35,11 @@ export function renderDashboard({
     : "Fresh AI pipeline results from the latest uploaded CSV export.";
   const uploadWorkspace = !isHistorical ? renderUploadPanel(mode) : "";
 
+  // Calculate Mean PICI across all chronic hotspots (representing 6-month historical baseline)
+  const meanPici = hotspots && hotspots.length > 0
+    ? hotspots.reduce((sum, h) => sum + (Number(h.avg_pici) || 0), 0) / hotspots.length
+    : 0.42;
+
   return `
     <main class="shell${navOpen ? " nav-pinned" : ""}">
       ${renderNavbar(mode, view, navOpen)}
@@ -58,7 +63,7 @@ export function renderDashboard({
 
       ${renderDataContext(mode, uploadMeta)}
       ${uploadWorkspace}
-      ${renderMetrics({ health, stats, mode })}
+      ${renderMetrics({ health, stats, mode, hotspots })}
 
       <section class="analysis-section" id="spatial-intelligence">
         <div class="section-heading">
