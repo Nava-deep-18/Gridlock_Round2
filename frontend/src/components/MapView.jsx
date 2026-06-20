@@ -7,7 +7,23 @@ import { renderNavbar } from "./Navbar.jsx";
  * Returns the HTML shell for the map container (no map instance yet).
  * initMapView() is called after this HTML is injected into the DOM.
  */
-function renderMapContainer() {
+function renderMapContainer(mode) {
+  const isHistorical = mode === "historical";
+  const maxHour = isHistorical ? 14 : 23;
+  const labelsHtml = isHistorical ? `
+            <span>12 AM</span>
+            <span>4 AM</span>
+            <span>8 AM</span>
+            <span>12 PM</span>
+            <span>2 PM</span>
+  ` : `
+            <span>12 AM</span>
+            <span>6 AM</span>
+            <span>12 PM</span>
+            <span>6 PM</span>
+            <span>11 PM</span>
+  `;
+
   return `
     <div class="map-container full-page-map">
       <div id="enforcement-map"></div>
@@ -78,7 +94,7 @@ function renderMapContainer() {
               <svg id="pause-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
             
-            <input id="time-range-slider" type="range" min="0" max="14" value="10" style="
+            <input id="time-range-slider" type="range" min="0" max="${maxHour}" value="10" style="
               flex: 1;
               cursor: pointer;
               accent-color: var(--accent-2);
@@ -86,11 +102,7 @@ function renderMapContainer() {
           </div>
           
           <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); font-weight: 700;">
-            <span>12 AM</span>
-            <span>4 AM</span>
-            <span>8 AM</span>
-            <span>12 PM</span>
-            <span>2 PM</span>
+            ${labelsHtml}
           </div>
         </div>
       </div>
@@ -124,7 +136,7 @@ export function renderMapPage({ mode, view, navOpen }) {
           </div>
         </div>
       </div>
-      ${renderMapContainer()}
+      ${renderMapContainer(mode)}
       <div class="map-controls-hint">
         <p>Scroll to zoom. Intensity reflects Parking-Induced Congestion Impact (PICI) scores computed by the AI pipeline. Displaying <strong>${isHistorical ? "Historical" : "Uploaded CSV"}</strong> dataset.</p>
       </div>
@@ -296,7 +308,8 @@ export function initMapView(points = [], hotspots = [], mode = "historical") {
             clearInterval(playInterval);
             return;
           }
-          let nextHour = (parseInt(sliderEl.value) + 1) % 15;
+          const maxLoop = mode === "historical" ? 15 : 24;
+          let nextHour = (parseInt(sliderEl.value) + 1) % maxLoop;
           sliderEl.value = nextHour;
           updateHeatmapForHour(nextHour);
         }, 800); // Pulse every 800ms

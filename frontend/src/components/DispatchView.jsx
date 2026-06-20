@@ -1,7 +1,7 @@
 import { renderNavbar } from "./Navbar.jsx";
 
 /**
- * Renders the layout of the dedicated Smart Dispatch page.
+ * Renders the layout of the dedicated Patrol Window page.
  */
 export function renderDispatchPage({ mode, view, navOpen }) {
   const isHistorical = mode === "historical";
@@ -13,7 +13,7 @@ export function renderDispatchPage({ mode, view, navOpen }) {
       <div class="page-top">
         <div class="page-greeting">
           <p>Patrol Optimization</p>
-          <h1>Smart Dispatch Center</h1>
+          <h1>Patrol Window</h1>
         </div>
         <div class="page-badges">
           <div class="mode-toggle-group">
@@ -53,63 +53,70 @@ export function renderDispatchPage({ mode, view, navOpen }) {
         </div>
       </article>
 
-      <!-- Bottom Section: Simulator Workspace (Split Grid) -->
+      <!-- Bottom Section: Dispatch Workspace (Split Grid) -->
       <div class="dispatch-container" style="display: grid; grid-template-columns: minmax(300px, 0.35fr) minmax(0, 0.65fr); gap: 24px; margin-top: 24px; align-items: start; margin-bottom: 30px;">
         
-        <!-- Bottom Left: Simulator Inputs & KPIs -->
+        <!-- Bottom Left: Filters & Summaries -->
         <div class="dispatch-sidebar-controls" style="display: grid; gap: 20px;">
           
           <article class="card select-card" style="padding: 20px; display: grid; gap: 16px;">
-            <h2>Simulator Inputs</h2>
+            <h2>Patrol Filters</h2>
             
             <div style="display: grid; gap: 6px;">
-              <label for="dispatch-station-select" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2);">
+              <label for="dispatch-station-select" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em;">
                 Select Police Station
               </label>
               <select id="dispatch-station-select" style="width: 100%; padding: 10px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none;"></select>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div style="display: grid; gap: 6px;">
-                <label for="dispatch-tow-trucks" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red);">
-                  Tow Trucks
-                </label>
-                <input id="dispatch-tow-trucks" type="number" min="0" value="2" style="width: 100%; padding: 10px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none;" />
-              </div>
-              
-              <div style="display: grid; gap: 6px;">
-                <label for="dispatch-officers" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--green);">
-                  Patrol Officers
-                </label>
-                <input id="dispatch-officers" type="number" min="0" value="4" style="width: 100%; padding: 10px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none;" />
-              </div>
+            <div style="display: grid; gap: 6px;">
+              <label for="dispatch-day-select" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em;">
+                Select Day of the Week
+              </label>
+              <select id="dispatch-day-select" style="width: 100%; padding: 10px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none;">
+                <option value="all">All Days</option>
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+              </select>
             </div>
 
-            <button id="dispatch-btn" type="button" class="btn" style="width: 100%; background: var(--accent); color: var(--text); font-weight: 700; padding: 12px; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: background 200ms;">
-              🚀 Run Dispatch Simulator
-            </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div style="display: grid; gap: 6px;">
+                <label for="dispatch-start-select" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em;">
+                  Start Hour
+                </label>
+                <select id="dispatch-start-select" style="width: 100%; padding: 10px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none;"></select>
+              </div>
+              <div style="display: grid; gap: 6px;">
+                <label for="dispatch-end-select" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em;">
+                  End Hour
+                </label>
+                <select id="dispatch-end-select" style="width: 100%; padding: 10px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none;"></select>
+              </div>
+            </div>
           </article>
 
-          <!-- Simulator Results (KPI Scorecard) -->
-          <article class="card kpi-card" style="padding: 20px; display: grid; gap: 16px;">
-            <h2>Simulation Results</h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
-              
-              <div style="background: var(--surface-2); border: 1px solid var(--border); padding: 12px 6px; border-radius: var(--radius-sm);">
-                <div id="kpi-relief" style="font-size: 20px; font-weight: 800; color: var(--accent-2);">-</div>
-                <small style="display: block; font-size: 10px; color: var(--text-2); margin-top: 4px; line-height: 1.2;">Relief Score</small>
+          <!-- Shift Summary Card -->
+          <article class="card summary-card" style="padding: 20px; display: grid; gap: 16px;">
+            <h2>Patrol Summary</h2>
+            <div style="display: grid; gap: 10px;">
+              <div style="background: var(--surface-2); border: 1px solid var(--border); padding: 12px 14px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+                <small style="font-size: 11px; color: var(--text-2); font-weight: 600;">Active Windows</small>
+                <div id="summary-total-windows" style="font-size: 16px; font-weight: 800; color: var(--accent-2);">-</div>
               </div>
-
-              <div style="background: var(--surface-2); border: 1px solid var(--border); padding: 12px 6px; border-radius: var(--radius-sm);">
-                <div id="kpi-slots" style="font-size: 20px; font-weight: 800; color: var(--green);">-</div>
-                <small style="display: block; font-size: 10px; color: var(--text-2); margin-top: 4px; line-height: 1.2;">Slots Covered</small>
+              <div style="background: var(--surface-2); border: 1px solid var(--border); padding: 12px 14px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+                <small style="font-size: 11px; color: var(--text-2); font-weight: 600;">Peak Priority</small>
+                <div id="summary-peak-priority" style="font-size: 16px; font-weight: 800; color: var(--red);">-</div>
               </div>
-
-              <div style="background: var(--surface-2); border: 1px solid var(--border); padding: 12px 6px; border-radius: var(--radius-sm);">
-                <div id="kpi-utilization" style="font-size: 20px; font-weight: 800; color: var(--amber);">-</div>
-                <small style="display: block; font-size: 10px; color: var(--text-2); margin-top: 4px; line-height: 1.2;">Active Force</small>
+              <div style="background: var(--surface-2); border: 1px solid var(--border); padding: 12px 14px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+                <small style="font-size: 11px; color: var(--text-2); font-weight: 600;">Avg Expected Violations</small>
+                <div id="summary-avg-violations" style="font-size: 16px; font-weight: 800; color: var(--green);">-</div>
               </div>
-
             </div>
           </article>
         </div>
@@ -122,7 +129,7 @@ export function renderDispatchPage({ mode, view, navOpen }) {
           </div>
           <h2 id="recs-title">Patrol Schedule</h2>
           <p style="font-size: 11px; color: var(--text-2); margin: -4px 0 16px 0; line-height: 1.4;">
-            Active recommended windows showing simulated dispatches.
+            Active recommended windows showing expected violations.
           </p>
           <ul id="station-recs-list" class="deployment-list scrollable-container" style="max-height: 480px;"></ul>
         </article>
@@ -148,34 +155,56 @@ export function renderDispatchPage({ mode, view, navOpen }) {
 /**
  * Binds DOM events and handles the resource simulator logic.
  */
-export function initDispatchView(hotspots, recommendations) {
+export function initDispatchView(hotspots, recommendations, mode = "historical") {
   const stationSelect = document.getElementById("dispatch-station-select");
-  const towTrucksInput = document.getElementById("dispatch-tow-trucks");
-  const officersInput = document.getElementById("dispatch-officers");
-  const dispatchBtn = document.getElementById("dispatch-btn");
+  const daySelect = document.getElementById("dispatch-day-select");
+  const startSelect = document.getElementById("dispatch-start-select");
+  const endSelect = document.getElementById("dispatch-end-select");
   
-  const kpiRelief = document.getElementById("kpi-relief");
-  const kpiSlots = document.getElementById("kpi-slots");
-  const kpiUtilization = document.getElementById("kpi-utilization");
+  const summaryTotalWindows = document.getElementById("summary-total-windows");
+  const summaryPeakPriority = document.getElementById("summary-peak-priority");
+  const summaryAvgViolations = document.getElementById("summary-avg-violations");
   
   const calendarGridBody = document.getElementById("calendar-grid-body");
   
   const stationRecsList = document.getElementById("station-recs-list");
   const stationRecsCount = document.getElementById("recs-count");
   const recsTitle = document.getElementById("recs-title");
-
+ 
   // Modal elements
   const modal = document.getElementById("dispatch-modal");
   const modalTitle = document.getElementById("modal-title");
   const modalSubtitle = document.getElementById("modal-subtitle");
   const modalRecsList = document.getElementById("modal-recs-list");
   const closeModalBtn = document.getElementById("close-modal-btn");
+ 
+  if (!stationSelect || !daySelect || !startSelect || !endSelect || !stationRecsList || !calendarGridBody || !modal) return;
 
-  if (!stationSelect || !stationRecsList || !calendarGridBody || !modal) return;
+  const isHistorical = mode === "historical";
+  const startHourLimit = 0;
+  const endHourLimit = isHistorical ? 14 : 23;
 
-  // Active assignments map (key: day_hour -> assignment)
-  let activeAssignments = null;
+  function getHourLabel(h) {
+    if (h === 0) return "12 AM";
+    if (h === 12) return "12 PM";
+    const ampm = h >= 12 ? "PM" : "AM";
+    const displayH = h % 12 === 0 ? 12 : h % 12;
+    return `${displayH} ${ampm}`;
+  }
 
+  // Populate Start/End Hour Dropdowns
+  let hoursHtml = "";
+  for (let h = startHourLimit; h <= endHourLimit; h++) {
+    hoursHtml += `<option value="${h}">${getHourLabel(h)}</option>`;
+  }
+  startSelect.innerHTML = hoursHtml;
+  endSelect.innerHTML = hoursHtml;
+
+  // Set default values as per user request:
+  // Start Hour: 12 AM (0), End Hour: 2 PM (14)
+  startSelect.value = "0";
+  endSelect.value = endHourLimit >= 14 ? "14" : String(endHourLimit);
+ 
   // Helper to format priority score
   function formatPriorityScore(score) {
     const num = Number(score) || 0;
@@ -183,16 +212,16 @@ export function initDispatchView(hotspots, recommendations) {
     if (num < 0.01) return num.toFixed(3);
     return num.toFixed(2);
   }
-
+ 
   // Create hotspot rank -> police station mapping
   const stationMap = new Map();
   hotspots.forEach(h => {
     stationMap.set(h.hotspot_rank, h.primary_police_station || "Unknown");
   });
-
-  // Enrich recommendations with police station and filter to calendar hours (8-14)
+ 
+  // Enrich recommendations with police station and filter to calendar hours
   const enrichedRecs = recommendations
-    .filter(r => r.hour >= 8 && r.hour <= 14)
+    .filter(r => r.hour >= startHourLimit && r.hour <= endHourLimit)
     .map(r => ({
       ...r,
       police_station: stationMap.get(r.hotspot_rank) || "Unknown"
@@ -203,6 +232,17 @@ export function initDispatchView(hotspots, recommendations) {
   // Populate stations dropdown
   const uniqueStations = Array.from(new Set(enrichedRecs.map(r => r.police_station).filter(Boolean))).sort();
   stationSelect.innerHTML = uniqueStations.map(station => `<option value="${station}">${station}</option>`).join("");
+
+  // Set default values as per user request:
+  // Police Station: Shivajinagar
+  if (uniqueStations.includes("Shivajinagar")) {
+    stationSelect.value = "Shivajinagar";
+  } else if (uniqueStations.length > 0) {
+    stationSelect.value = uniqueStations[0];
+  }
+
+  // Day of the week: Thursday (3)
+  daySelect.value = "3";
 
   // Renders the overall city-wide calendar grid
   function updateCalendarGrid() {
@@ -215,7 +255,7 @@ export function initDispatchView(hotspots, recommendations) {
     });
 
     let bodyHtml = "";
-    for (let hr = 8; hr <= 14; hr++) {
+    for (let hr = startHourLimit; hr <= endHourLimit; hr++) {
       const timeStr = `${String(hr).padStart(2, "0")}:00`;
       bodyHtml += `<div style="text-align: center; font-size: 11px; color: var(--text-2); font-weight: 600; padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center;">${timeStr}</div>`;
       
@@ -276,7 +316,7 @@ export function initDispatchView(hotspots, recommendations) {
                 </div>
                 <div class="deployment-meta">
                   <span>GPS <b>${Number(item.center_lat).toFixed(4)}, ${Number(item.center_lng).toFixed(4)}</b></span>
-                  <span>Expected <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
+                  <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
                   <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
                 </div>
               </div>
@@ -296,45 +336,54 @@ export function initDispatchView(hotspots, recommendations) {
   // Renders the bottom station-specific patrols list
   function updateStationRecs() {
     const selectedStation = stationSelect.value;
+    const selectedDay = daySelect.value;
+    const startHour = parseInt(startSelect.value);
+    const endHour = parseInt(endSelect.value);
     
     // Filter recommendations by selected station
     let filtered = enrichedRecs.filter(r => r.police_station === selectedStation);
+
+    // Apply Day of Week filter
+    if (selectedDay !== "all") {
+      const dayInt = parseInt(selectedDay);
+      filtered = filtered.filter(r => r.day_of_week === dayInt);
+    }
+
+    // Apply custom Time Range filter (supporting wrap-around midnight)
+    if (startHour <= endHour) {
+      filtered = filtered.filter(r => r.hour >= startHour && r.hour <= endHour);
+    } else {
+      filtered = filtered.filter(r => r.hour >= startHour || r.hour <= endHour);
+    }
+
     filtered.sort((a, b) => b.priority_score - a.priority_score);
 
     const totalSlotsCount = filtered.length;
     recsTitle.textContent = `${selectedStation} Patrol Schedule`;
     stationRecsCount.textContent = `Total: ${totalSlotsCount} Windows`;
 
-    // Set KPIs to active 0s if simulator has not been run
-    if (!activeAssignments) {
-      kpiRelief.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--accent-2);">0%</span><small style="display:block;font-size:10px;color:var(--text-2);margin-top:4px;">Relief Score</small>`;
-      kpiSlots.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--green);">0/${totalSlotsCount}</span><small style="display:block;font-size:10px;color:var(--text-2);margin-top:4px;">Slots Covered</small>`;
-      kpiUtilization.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--amber);">0%</span><small style="display:block;font-size:10px;color:var(--text-2);margin-top:4px;">Active Force</small>`;
+    // Calculate Summary Stats
+    if (summaryTotalWindows && summaryPeakPriority && summaryAvgViolations) {
+      summaryTotalWindows.textContent = totalSlotsCount;
+      if (totalSlotsCount > 0) {
+        const maxPriority = Math.max(...filtered.map(r => r.priority_score));
+        const avgVio = filtered.reduce((sum, r) => sum + r.predicted_violations, 0) / totalSlotsCount;
+        summaryPeakPriority.textContent = formatPriorityScore(maxPriority);
+        summaryAvgViolations.textContent = avgVio.toFixed(1);
+      } else {
+        summaryPeakPriority.textContent = "0.00";
+        summaryAvgViolations.textContent = "0.0";
+      }
     }
 
     if (filtered.length === 0) {
-      stationRecsList.innerHTML = `<li class="status-card" style="padding: 24px; text-align: center; color: var(--text-2);">No recommended patrol windows found for this station.</li>`;
+      stationRecsList.innerHTML = `<li class="status-card" style="padding: 24px; text-align: center; color: var(--text-2);">No recommended patrol windows found for this station in the selected slot.</li>`;
       return;
     }
 
     const html = filtered.map((item) => {
-      const assignmentKey = `${item.day_of_week}_${item.hour}_${item.hotspot_rank}`;
-      let statusHtml = `<span class="badge badge-purple" style="opacity: 0.7">● Standby</span>`;
-      let borderStyle = "";
-      
-      if (activeAssignments && activeAssignments.has(assignmentKey)) {
-        const assignment = activeAssignments.get(assignmentKey);
-        if (assignment.type === "tow_truck") {
-          statusHtml = `<span class="badge badge-red" style="font-weight: 700;">🚨 Dispatched (Tow Truck #${assignment.id})</span>`;
-          borderStyle = "border: 1px solid var(--red)";
-        } else if (assignment.type === "officer") {
-          statusHtml = `<span class="badge badge-green" style="font-weight: 700;">👮 Dispatched (Officer #${assignment.id})</span>`;
-          borderStyle = "border: 1px solid var(--green)";
-        }
-      }
-
       return `
-        <li class="deployment-item" style="${borderStyle}" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
+        <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected Violations ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
           <div class="deployment-rank">#${item.hotspot_rank}</div>
           <div class="deployment-body">
             <div class="deployment-topline">
@@ -343,14 +392,13 @@ export function initDispatchView(hotspots, recommendations) {
             </div>
             <div class="deployment-meta">
               <span>GPS <b>${Number(item.center_lat).toFixed(4)}, ${Number(item.center_lng).toFixed(4)}</b></span>
-              <span>Expected <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
+              <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
               <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
             </div>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 90px;">
             <span style="font-size: 8px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Priority</span>
             <div class="priority-score" style="margin-top: -2px;">${formatPriorityScore(item.priority_score)}</div>
-            ${statusHtml}
           </div>
         </li>
       `;
@@ -363,91 +411,6 @@ export function initDispatchView(hotspots, recommendations) {
   updateCalendarGrid();
   updateStationRecs();
 
-  // Run Dispatch Simulator Button Click Handler (Hour-by-Hour Shift Allocation)
-  dispatchBtn?.addEventListener("click", () => {
-    const towTrucksInputVal = parseInt(towTrucksInput.value) || 0;
-    const officersInputVal = parseInt(officersInput.value) || 0;
-    const selectedStation = stationSelect.value;
-
-    const stationRecs = enrichedRecs.filter(r => r.police_station === selectedStation);
-    if (stationRecs.length === 0) return;
-
-    // Group recommendations by day and hour
-    const hourlyGroups = new Map();
-    stationRecs.forEach(r => {
-      const key = `${r.day_of_week}_${r.hour}`;
-      if (!hourlyGroups.has(key)) hourlyGroups.set(key, []);
-      hourlyGroups.get(key).push(r);
-    });
-
-    // Run shift allocation logic hour-by-hour
-    activeAssignments = new Map(); // key: day_hour_rank -> assignment
-    
-    let totalScheduledSlotsCount = stationRecs.length;
-    let coveredSlotsCount = 0;
-    let accumulatedUtilization = 0;
-
-    hourlyGroups.forEach((records, key) => {
-      // Sort the hotspots in this hour block by Priority Score descending
-      records.sort((a, b) => b.priority_score - a.priority_score);
-
-      let remainingTrucks = towTrucksInputVal;
-      let remainingOfficers = officersInputVal;
-
-      let assignedTrucks = 0;
-      let assignedOfficers = 0;
-
-      // Assign resources to sorted hotspots in this hour
-      for (let i = 0; i < records.length; i++) {
-        const record = records[i];
-        const recordKey = `${record.day_of_week}_${record.hour}_${record.hotspot_rank}`;
-        
-        // Tow Trucks are reserved for high-risk slots (predicted_violations >= 1.0)
-        const isHighRisk = record.predicted_violations >= 1.0;
-        
-        if (isHighRisk && remainingTrucks > 0 && remainingOfficers > 0) {
-          assignedTrucks++;
-          remainingTrucks--;
-          remainingOfficers--;
-          activeAssignments.set(recordKey, { type: "tow_truck", id: assignedTrucks });
-          coveredSlotsCount++;
-        } else if (remainingOfficers > 0) {
-          assignedOfficers++;
-          remainingOfficers--;
-          activeAssignments.set(recordKey, { type: "officer", id: assignedOfficers + towTrucksInputVal });
-          coveredSlotsCount++;
-        }
-      }
-
-      // Calculate hour force utilization based on personnel (officers) deployed
-      const officersUsedThisHour = officersInputVal - remainingOfficers;
-      const hourlyUtil = officersInputVal > 0 ? (officersUsedThisHour / officersInputVal) : 0;
-      accumulatedUtilization += hourlyUtil;
-    });
-
-    // Calculate overall KPIs
-    const totalScore = stationRecs.reduce((sum, item) => sum + item.priority_score, 0);
-    let assignedScore = 0;
-    stationRecs.forEach(item => {
-      const key = `${item.day_of_week}_${item.hour}_${item.hotspot_rank}`;
-      if (activeAssignments.has(key)) {
-        assignedScore += item.priority_score;
-      }
-    });
-
-    const reliefPercentage = totalScore > 0 ? Math.round((assignedScore / totalScore) * 100) : 0;
-    const activeHoursCount = hourlyGroups.size;
-    const avgUtilization = activeHoursCount > 0 ? Math.round((accumulatedUtilization / activeHoursCount) * 100) : 0;
-
-    // Update KPIs on the scorecard
-    kpiRelief.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--accent-2);">${reliefPercentage}%</span><small style="display:block;font-size:10px;color:var(--text-2);margin-top:4px;">Relief Score</small>`;
-    kpiSlots.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--green);">${coveredSlotsCount}/${totalScheduledSlotsCount}</span><small style="display:block;font-size:10px;color:var(--text-2);margin-top:4px;">Slots Covered</small>`;
-    kpiUtilization.innerHTML = `<span style="font-size:20px;font-weight:800;color:var(--amber);">${avgUtilization}%</span><small style="display:block;font-size:10px;color:var(--text-2);margin-top:4px;">Active Force</small>`;
-
-    // Re-render
-    updateStationRecs();
-  });
-
   // Modal close handlers
   closeModalBtn.addEventListener("click", () => {
     modal.style.display = "none";
@@ -459,9 +422,20 @@ export function initDispatchView(hotspots, recommendations) {
     }
   });
 
-  // Dropdown change handler
+  // Dropdown change handlers
   stationSelect.addEventListener("change", () => {
-    activeAssignments = null;
+    updateCalendarGrid();
+    updateStationRecs();
+  });
+  daySelect.addEventListener("change", () => {
+    updateCalendarGrid();
+    updateStationRecs();
+  });
+  startSelect.addEventListener("change", () => {
+    updateCalendarGrid();
+    updateStationRecs();
+  });
+  endSelect.addEventListener("change", () => {
     updateCalendarGrid();
     updateStationRecs();
   });

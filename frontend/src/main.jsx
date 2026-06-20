@@ -101,7 +101,7 @@ async function loadDashboard(mode = state.mode) {
         view: state.view,
         navOpen: state.navOpen,
       });
-      initDispatchView(hotspots, recommendations);
+      initDispatchView(hotspots, recommendations, mode);
     } else {
       const [
         health, stats, hotspots, recommendations, stationSummary,
@@ -173,7 +173,7 @@ function bindNav() {
       if (!nextView || nextView === state.view || state.isLoading) return;
       
       let nextMode = state.mode;
-      if (nextView === "map") {
+      if (nextView === "map" || nextView === "dispatch") {
         nextMode = "historical";
       }
       

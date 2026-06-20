@@ -1,7 +1,7 @@
 export function renderPatrolWindows(recommendations) {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const cards = recommendations.map((item, index) => `
-    <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
+    <li class="deployment-item" title="Priority Score: ${Number(item.priority_score).toFixed(2)} (Expected Violations ${Number(item.predicted_violations).toFixed(1)} x Impact ${Number(item.predicted_pici).toFixed(2)})">
       <div class="deployment-rank">${index + 1}</div>
       <div class="deployment-body">
         <div class="deployment-topline">
@@ -9,7 +9,7 @@ export function renderPatrolWindows(recommendations) {
           <span>${dayNames[item.day_of_week] || item.day_of_week} ${String(item.hour).padStart(2, "0")}:00</span>
         </div>
         <div class="deployment-meta">
-          <span>Expected <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
+          <span>Expected Violations <b>${Number(item.predicted_violations).toFixed(1)}</b></span>
           <span>Impact (PICI) <b>${Number(item.predicted_pici).toFixed(2)}</b></span>
         </div>
       </div>
