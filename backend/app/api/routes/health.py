@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from app.core.config import settings
 from app.schemas.health import DatasetHealth, HealthResponse, PingResponse
@@ -11,6 +11,12 @@ router = APIRouter()
 def get_ping():
     """Lightweight liveness endpoint for external uptime checks."""
     return PingResponse(status="ok")
+
+
+@router.head("/ping")
+def head_ping():
+    """Allow uptime monitors that use HEAD requests."""
+    return Response(status_code=200)
 
 
 @router.get("/health", response_model=HealthResponse)

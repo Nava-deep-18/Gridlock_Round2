@@ -32,6 +32,10 @@ class BackendApiSmokeTests(unittest.TestCase):
                 response = self.client.get(endpoint)
                 self.assertEqual(response.status_code, 200, response.text)
 
+    def test_ping_allows_head_requests(self):
+        response = self.client.head("/api/ping")
+        self.assertEqual(response.status_code, 200, response.text)
+
     def test_upload_reprocesses_sample_data(self):
         sample_path = self.repo_root / "sample_data" / "sample_upload.csv"
 
