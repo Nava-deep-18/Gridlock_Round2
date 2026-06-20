@@ -3,6 +3,7 @@ import shutil
 from fastapi import HTTPException, UploadFile
 
 from app.core.config import settings
+from app.services.datasets import clear_dataset_caches
 from src.data_pipeline import REQUIRED_RAW_COLUMNS
 from src.main import run_pipeline
 
@@ -54,3 +55,4 @@ def process_new_upload(file: UploadFile):
         raise
 
     run_pipeline(mode="new_data")
+    clear_dataset_caches()

@@ -1,14 +1,16 @@
 # 🚗 Approach Strategy: AI-Driven Parking Intelligence for Bengaluru
 
-## Recent Backend Enhancements
+## Recent Completion Updates
 
 - **Upload Guardrails & Pipeline Fixes:** Added a strict 50MB file size limit and CSV schema validation to the `/api/upload` endpoint. A critical Pandas array parsing bug in `feature_engineering.py` was also squashed, making the upload pipeline bulletproof.
-- **New Analytical Endpoints:** Built four new endpoints to power the React dashboard:
+- **New Analytical Endpoints:** Built four new endpoints to power the Vite dashboard:
   - `GET /api/heatmap` (Limited to top 10k violations to prevent browser freezing)
   - `GET /api/summary/station`
   - `GET /api/summary/temporal`
   - `GET /api/summary/vehicle`
-- **Upload Strategy for Live Demo:** The AI Hotspot Clustering uses DBSCAN with a strict threshold (`min_samples=50` within 50 meters). If a small CSV (e.g., 200 rows) is uploaded during the demo, the algorithm will correctly find 0 hotspots, causing the pipeline's strict validation to fail. **To ensure a spectacular live demo, judges will be instructed to upload a dataset containing at least 3 months of violations.** This guarantees dense enough data to form meaningful, glowing red hotspots without compromising the integrity of the algorithm.
+- **Frontend Dashboard Completed:** The Vite frontend now includes Historical/New Data mode switching, upload workflow, metrics, hotspot ranking, station load, temporal insights, vehicle analysis, repeat-offender analysis, an enforcement map, and a Patrol Window workspace.
+- **Map and Patrol Views Completed:** The enforcement map uses Leaflet + OpenStreetMap with a PICI heat layer, hotspot markers, an hour slider, and a top-hotspot relief simulation toggle. The Patrol Window includes a weekly scheduler, station/day/hour filters, city-wide slot popups, and deploy/recall interactions stored locally.
+- **Upload Strategy for Live Demo:** Historical clustering remains strict (`min_samples=50` within 50 meters). New Data mode now uses a smaller threshold (`min_samples=5`) so the bundled `sample_upload.csv` can produce usable demo hotspots while preserving stricter historical hotspot detection.
 
 ## Current Implementation Status
 
@@ -27,11 +29,18 @@
 - Backend has been modularized into a FastAPI package under `backend/app/`.
 - Backend supports two modes: `historical` and `new_data`.
 - Backend endpoints currently support full dashboard functionality, analytical charts, and secure CSV uploads.
+- Frontend dashboard is implemented under `frontend/` with Historical and New Data modes.
+- Upload workspace is functional and refreshes the dashboard into New Data mode after processing.
+- Leaflet + OpenStreetMap enforcement map is implemented with PICI heatmap, hotspot markers, time slider, and relief simulation toggle.
+- Patrol Window view is implemented with weekly scheduler grid, station/day/hour filters, city-wide popups, and deploy/recall controls.
+- Temporal insights, vehicle analysis, station-load dashboard, and repeat-offender summaries are implemented.
+- Verification currently passes for backend compile, backend smoke tests, and frontend production build.
 
 ### Still Pending
 
-- Build the React/Vite frontend dashboard.
 - Deploy backend and frontend.
+- Prepare final submission artifacts: screenshots, demo video, pitch deck/PDF, hosted demo link, repository URL, source ZIP, and final run instructions.
+- Production hardening: background processing/progress state for large uploads, tighter CORS settings, environment-specific deployment settings, and cleanup of placeholder frontend scaffold files.
 
 ---
 
@@ -209,15 +218,15 @@ The jury (BTP + Flipkart) evaluates on: **feasibility, relevance, innovation, an
 | **Backend** | **FastAPI (Python)** | Serves processed data + accepts new CSV uploads for reprocessing |
 | **Data Processing** | Pandas, NumPy | Standard, fast, reproducible |
 | **ML/AI** | Scikit-learn (DBSCAN/HDBSCAN), XGBoost | Lightweight, no GPU needed |
-| **Frontend** | **React + Vite** | Component-based, clean code for repo review by judges |
-| **Maps** | **react-leaflet + OpenStreetMap tiles** | Free, no API key, full control (MapMyIndia was NOT provided) |
-| **Charts** | **Recharts** or Chart.js | React-native charting, rich interactive visualizations |
+| **Frontend** | **Vite + modular JavaScript render components** | Fast local development and a compact production bundle |
+| **Maps** | **Leaflet + leaflet.heat + OpenStreetMap tiles** | Free, no API key, full control (MapMyIndia was NOT provided) |
+| **Charts / Visual Summaries** | **Custom HTML/CSS visualization components** | Keeps the demo lightweight while covering temporal, vehicle, station, and repeat-offender insights |
 | **Frontend Hosting** | **Vercel** (free tier) | Always-on, auto-deploys from GitHub, no sleep |
 | **Backend Hosting** | **Render** or **Railway** (free tier) | Python support, free, handles FastAPI |
 
 > [!IMPORTANT]
 > **No Streamlit.** It goes to sleep on free tier — bad for judges checking the demo link.
-> **No Folium.** We use react-leaflet since frontend is React-based.
+> **No Folium.** We use Leaflet directly in the Vite frontend.
 > **No MapMyIndia.** Was never provided — using Leaflet + OSM instead.
 
 ---

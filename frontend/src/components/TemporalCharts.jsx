@@ -65,11 +65,14 @@ export function renderTemporalInsights(temporalSummary) {
   const rowsHtml = grid.map((row, d) => `
     <div class="temporal-grid-row">
       <span class="day-label">${dayShort[d]}</span>
-      ${row.map(val => {
+      ${row.map((val, blockIndex) => {
         const intensity = maxVal > 0 ? val / maxVal : 0;
-        const opacity = 0.1 + (intensity * 0.9);
-        const color = intensity > 0.7 ? "var(--red)" : intensity > 0.4 ? "var(--accent-2)" : "var(--accent)";
-        return `<div class="grid-cell" style="background: ${color}; opacity: ${opacity}" title="${val} violations"></div>`;
+        const alpha = (0.12 + (intensity * 0.88)).toFixed(2);
+        const rgb = intensity > 0.7 ? "244, 63, 94" : intensity > 0.4 ? "155, 125, 232" : "124, 92, 191";
+        const startHour = hourLabels[blockIndex] || "00h";
+        const endHour = String((blockIndex + 1) * 3).padStart(2, "0");
+        const tooltip = `${dayNames[d]} ${startHour}-${endHour}h: ${val} violations`;
+        return `<div class="grid-cell" style="background: rgba(${rgb}, ${alpha})" data-tooltip="${tooltip}" aria-label="${tooltip}"></div>`;
       }).join("")}
     </div>
   `).join("");

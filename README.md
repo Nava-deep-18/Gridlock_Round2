@@ -15,7 +15,7 @@ The system is not a static dashboard. It has a FastAPI backend, an AI/ML process
 - Generates ranked hotspot tables by total congestion impact.
 - Trains temporal models for patrol-window recommendations.
 - Serves analytics through FastAPI endpoints.
-- Provides a blue, professional dashboard with mode switching, upload workflow, hotspot rankings, station-load analysis, and deployment recommendations.
+- Provides a professional operations dashboard with mode switching, upload workflow, hotspot rankings, station-load analysis, temporal and vehicle summaries, repeat-offender analysis, a Leaflet heatmap, and a patrol-window workspace.
 
 ## Current Status
 
@@ -34,13 +34,19 @@ Implemented:
 - Vite frontend under `frontend/`.
 - Historical/New Data mode switching.
 - New Data upload workspace.
+- Leaflet + OpenStreetMap enforcement heatmap.
+- Time slider for hour-by-hour hotspot intensity.
+- Enforcement-relief simulation toggle for top chronic hotspots.
+- Patrol Window workspace with city-wide scheduler, station filters, and local deploy/recall state.
+- Temporal, vehicle, station-load, and repeat-offender dashboard modules.
 - Professional deep-blue dashboard layout.
 
 Known scope still to improve:
 
-- Add map/heatmap visualization.
-- Add temporal and vehicle charts.
 - Add deployment/hosting configuration for production.
+- Move long-running upload processing to a background job/progress workflow for production.
+- Tighten CORS and environment-specific settings before production deployment.
+- Remove or fill placeholder frontend files left from the initial scaffold.
 - Replace inline SVG icons with an icon package if the frontend dependency set is expanded.
 
 ## Repository Structure
@@ -182,6 +188,7 @@ GET /api/heatmap
 GET /api/summary/station
 GET /api/summary/temporal
 GET /api/summary/vehicle
+GET /api/summary/repeat-offenders
 ```
 
 Key endpoint behavior:
@@ -192,6 +199,7 @@ Key endpoint behavior:
 - `/api/summary/station`: station-level load and PICI totals.
 - `/api/summary/temporal`: violation counts by day and hour.
 - `/api/summary/vehicle`: violation counts by vehicle category.
+- `/api/summary/repeat-offenders`: anonymized repeat-violation vehicles.
 
 ### Upload
 
@@ -282,7 +290,12 @@ Current UI behavior:
 - Top metrics.
 - Top 15 hotspot table.
 - Top 10 station-load panel with load bars.
-- Top 10 deployment-load recommendation cards.
+- Temporal intensity and vehicle-category analysis.
+- Repeat-offender summary panel.
+- Leaflet + OpenStreetMap enforcement map with PICI heat layer.
+- Time-travel slider for hourly map intensity.
+- Enforcement-relief simulation toggle for top chronic hotspots.
+- Patrol Window view with weekly scheduler, station/day/hour filters, and deploy/recall controls.
 - Muted deep-blue professional theme.
 
 ## Local Setup
@@ -363,7 +376,10 @@ http://localhost:8000
    - top metrics
    - top 15 hotspots
    - top 10 station load
-   - top 10 deployment recommendations
+   - temporal and vehicle summaries
+   - repeat-offender analysis
+   - enforcement map
+   - patrol-window scheduler
 5. Switch to New Data Mode.
 6. Upload:
 

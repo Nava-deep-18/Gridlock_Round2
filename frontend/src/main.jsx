@@ -104,13 +104,12 @@ async function loadDashboard(mode = state.mode) {
       initDispatchView(hotspots, recommendations, mode);
     } else {
       const [
-        health, stats, hotspots, recommendations, stationSummary,
+        health, stats, hotspots, stationSummary,
         temporalSummary, vehicleSummary, repeatOffenders
       ] = await Promise.all([
         fetchJson(modePath("/api/health", mode)),
         fetchJson(modePath("/api/stats", mode)),
         fetchJson(modePath("/api/hotspots", mode)),
-        fetchJson(modePath("/api/recommendations", mode)),
         fetchJson(modePath("/api/summary/station", mode)),
         fetchOptional(modePath("/api/summary/temporal", mode), []),
         fetchOptional(modePath("/api/summary/vehicle", mode), []),
@@ -125,7 +124,6 @@ async function loadDashboard(mode = state.mode) {
         health,
         stats,
         hotspots,
-        recommendations,
         stationSummary,
         temporalSummary,
         vehicleSummary,

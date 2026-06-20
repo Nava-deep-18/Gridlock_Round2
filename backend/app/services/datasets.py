@@ -1,4 +1,5 @@
 from pathlib import Path
+from functools import lru_cache
 
 import pandas as pd
 from fastapi import HTTPException
@@ -22,12 +23,27 @@ def get_data_dir(mode: str) -> Path:
     return settings.processed_data_dir / mode
 
 
-def load_parquet(path: Path) -> pd.DataFrame:
+def file_signature(path: Path) -> tuple[str, int, int]:
     if not path.exists():
         raise HTTPException(status_code=404, detail=f"Dataset not found: {path.name}")
 
+    stat = path.stat()
+    return (str(path), stat.st_mtime_ns, stat.st_size)
+
+
+@lru_cache(maxsize=32)
+def _read_parquet_cached(path: str, modified_ns: int, size: int) -> pd.DataFrame:
+    del modified_ns, size
+    return pd.read_parquet(path)
+
+
+def clear_dataset_caches():
+    _read_parquet_cached.cache_clear()
+
+
+def load_parquet(path: Path) -> pd.DataFrame:
     try:
-        return pd.read_parquet(path)
+        return _read_parquet_cached(*file_signature(path))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Could not read {path.name}: {exc}") from exc
 
@@ -37,7 +53,7 @@ def dataset_health(path: Path, signal_column: str | None = None) -> DatasetHealt
         return DatasetHealthResult(ok=False, path=str(path), error="file not found")
 
     try:
-        df = pd.read_parquet(path)
+        df = load_parquet(path)
     except Exception as exc:
         return DatasetHealthResult(ok=False, path=str(path), error=f"read failed: {exc}")
 

@@ -1,7 +1,7 @@
 import { renderHotspotTable } from "./HotspotTable.jsx";
 import { renderMetrics } from "./Metrics.jsx";
 import { renderNavbar } from "./Navbar.jsx";
-import { renderPatrolWindows, renderTemporalInsights } from "./TemporalCharts.jsx";
+import { renderTemporalInsights } from "./TemporalCharts.jsx";
 import { renderVehicleAnalysis } from "./VehicleAnalysis.jsx";
 import { renderRepeatOffenders } from "./RepeatOffenders.jsx";
 import { renderStationDashboard } from "./StationDashboard.jsx";
@@ -26,7 +26,7 @@ function renderDataContext(mode, uploadMeta) {
 
 export function renderDashboard({
   mode, view, navOpen, uploadMeta,
-  health, stats, hotspots, recommendations,
+  health, stats, hotspots,
   stationSummary, temporalSummary, vehicleSummary, repeatOffenders,
 }) {
   const isHistorical = mode === "historical";
