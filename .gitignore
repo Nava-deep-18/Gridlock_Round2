@@ -3,9 +3,6 @@ data/raw/
 data/db/*
 !data/db/.gitkeep
 
-# Large generated CSV exports - use parquet instead
-data/processed/clean_violations.csv
-
 # Python
 __pycache__/
 *.py[cod]
