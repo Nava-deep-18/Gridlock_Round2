@@ -134,8 +134,8 @@ export function renderDispatchPage({ mode, view }) {
           </div>
           <h2 id="recs-title">Bottleneck Zones (Hotspots)</h2>
           <p style="font-size: 11px; color: var(--text-2); margin: -4px 0 16px 0; line-height: 1.4;">
-            Note: Active forecasted bottleneck zones (Hotspots). Choke (%) represents capacity loss.<br/>
-            <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">Severity Legend (PICI): Low (&lt;0.05) | Med (0.06-0.15) | High (0.16-0.25) | Crit (&ge;0.25)</span>
+            Note: Priority Score is calculated by multiplying Expected Violations by Predicted PICI severity (which is why it can be >1).<br/>
+            <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">Severity Legend (Average Single-Incident PICI): Low (&lt;0.05) | Med (0.06-0.15) | High (0.16-0.25) | Crit (&ge;0.25)</span>
           </p>
           <ul id="station-recs-list" class="deployment-list scrollable-container" style="flex: 1; min-height: 480px; max-height: 800px;"></ul>
         </article>
@@ -532,7 +532,7 @@ export function initDispatchView(hotspots, recommendations, mode = "historical")
 
         modalTitle.textContent = `City-wide Chronic Bottlenecks (Hotspots) — ${dayNames[day]} ${String(hour).padStart(2, "0")}:00`;
         modalSubtitle.innerHTML = `Displaying all ${filtered.length} active bottleneck zones (Hotspots) across Bengaluru. Deploy units manually.<br/>
-         <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 3px;">Severity Legend (PICI): Low (&lt;0.05) | Med (0.06-0.15) | High (0.16-0.25) | Crit (&ge;0.25)</span>`;
+         <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 3px;">Severity Legend (Average Single-Incident PICI): Low (&lt;0.05) | Med (0.06-0.15) | High (0.16-0.25) | Crit (&ge;0.25)</span>`;
         
         if (filtered.length === 0) {
           modalRecsList.innerHTML = `<li class="status-card" style="padding:20px;text-align:center;color:var(--text-2)">No hotspots scheduled for this hour.</li>`;

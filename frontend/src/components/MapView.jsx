@@ -215,7 +215,8 @@ export function renderMapPage({ mode, view }) {
       </div>
       ${renderMapContainer(mode)}
       <div class="map-controls-hint">
-        <p>Scroll to zoom. Intensity reflects Parking-Induced Congestion Impact (PICI) scores computed by the AI pipeline. Displaying <strong>${isHistorical ? "Historical" : "Uploaded CSV"}</strong> dataset.</p>
+        <p>Scroll to zoom. Intensity reflects Parking-Induced Congestion Impact (PICI) scores computed by the AI pipeline.<br/>
+        <strong>Note:</strong> The heatmap renders only the Top 10,000 worst individual incidents. The 0-1 PICI scale is a relative severity index squashed by extreme outliers. Displaying <strong>${isHistorical ? "Historical" : "Uploaded CSV"}</strong> dataset.</p>
       </div>
     </main>
   `;

@@ -34,7 +34,7 @@ export function renderPatrolWindows(recommendations) {
       </div>
       <h2>Deployment Recs (PICI)</h2>
       <p style="font-size: 11px; color: var(--text-2); margin: -4px 0 12px 0; line-height: 1.4;">
-        Priority Score = Expected Violations × Congestion Severity (PICI). High scores represent priority patrols.
+        Priority Score = Expected Violations × Predicted PICI severity. Since it multiplies expected volume by impact, scores can be >1.
       </p>
       <ul class="deployment-list scrollable-container">${cards}</ul>
       <div class="deployment-cta">

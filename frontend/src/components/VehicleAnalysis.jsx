@@ -104,6 +104,9 @@ export function renderVehicleAnalysis(vehicleSummary, temporalSummary) {
           <strong>Total: ${allVehicles.length}</strong>
         </div>
         <h2>Vehicle Type Analysis</h2>
+        <p style="font-size: 10px; color: var(--text-2); margin: -4px 0 12px 0; line-height: 1.4;">
+          Note: PICI here represents the Total <strong>SUM</strong> of congestion damage caused by all vehicles in this category.
+        </p>
         <div class="scrollable-container">
           <ul class="vehicle-list">${rows}</ul>
         </div>

@@ -32,7 +32,7 @@ export function renderHotspotTable(hotspots) {
       </div>
       <h2>Chronic Bottleneck Zones (Hotspots)</h2>
       <p style="font-size: 11px; color: var(--text-2); margin: -4px 0 12px 0; line-height: 1.4;">
-        Note: Total PICI represents the total volume of congestion damage that sector has suffered over the 6-month period. Average PICI represents the typical severity of a single illegal parking incident in that sector. Carriageway choke reflects capacity loss.<br/>
+        Note: Total PICI is the <strong>SUM</strong> of all incident scores over 6 months (which is why it is >1). Average PICI represents the typical severity per incident on a 0-to-1 scale. Carriageway choke reflects capacity loss.<br/>
         Mean PICI across all bottleneck zones (Hotspots) for all 6 months: <strong>${meanPici.toFixed(2)}</strong>.
       </p>
       <div class="scrollable-container">
