@@ -80,7 +80,7 @@ export function renderDashboard({
 
       <section class="intelligence-grid" id="decision-intelligence" style="grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr)">
         ${renderTemporalInsights(temporalSummary)}
-        ${renderVehicleAnalysis(vehicleSummary)}
+        ${renderVehicleAnalysis(vehicleSummary, temporalSummary)}
       </section>
     </main>
   `;

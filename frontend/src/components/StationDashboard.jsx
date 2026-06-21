@@ -24,6 +24,9 @@ export function renderStationDashboard(stationSummary) {
         <strong>Total: ${stationSummary.length}</strong>
       </div>
       <h2>Highest Load Stations</h2>
+      <p style="font-size: 11px; color: var(--text-2); margin: -8px 0 16px 0; line-height: 1.45;">
+        Distribution of total traffic violations across police station jurisdictions. The bar shows workload volume relative to the highest-volume station.
+      </p>
       <ul class="station-list scrollable-container">${stations}</ul>
     </article>
   `;

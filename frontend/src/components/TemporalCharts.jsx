@@ -105,6 +105,9 @@ export function renderTemporalInsights(temporalSummary) {
         <strong>Efficiency Score: 84%</strong>
       </div>
       <h2>Temporal Intensity</h2>
+      <p style="font-size: 11px; color: var(--text-2); margin: -8px 0 16px 0; line-height: 1.45;">
+        Aggregates total violations by day of week (M–S) and 3-hour daily intervals. Higher color density (purple to red) indicates peak violation periods, highlighting when rosters should be dispatched.
+      </p>
       <div class="temporal-grid-container">
         ${headerHtml}
         ${rowsHtml}

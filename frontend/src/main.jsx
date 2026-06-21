@@ -110,7 +110,7 @@ async function loadDashboard(mode = state.mode) {
         fetchJson(modePath("/api/summary/station", mode)),
         fetchOptional(modePath("/api/summary/temporal", mode), []),
         fetchOptional(modePath("/api/summary/vehicle", mode), []),
-        fetchOptional(modePath("/api/summary/repeat-offenders", mode), []),
+        fetchOptional(modePath("/api/summary/repeat-offenders?limit=100", mode), []),
       ]);
 
       root.innerHTML = renderDashboard({
