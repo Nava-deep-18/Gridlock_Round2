@@ -1,7 +1,7 @@
 # ParkSense AI - Parking Enforcement Intelligence
 
 <p align="left">
-  <a href="https://github.com/InspireEmber/MindSettler-GWOC-26"><img src="https://img.shields.io/badge/LIVE-DEMO-brightgreen?style=for-the-badge" alt="Live Demo" /></a>
+  <a href="https://gridlock-round2-five.vercel.app/"><img src="https://img.shields.io/badge/LIVE-DEMO-brightgreen?style=for-the-badge" alt="Live Demo" /></a>
   <img src="https://img.shields.io/badge/Frontend-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
   <img src="https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="Render" />
 </p>
