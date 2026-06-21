@@ -10,7 +10,6 @@ const state = {
   mode: "historical",   // "historical" | "new_data"
   view: "dashboard",    // "dashboard" | "map"
   isLoading: false,
-  navOpen: false,
   uploadMeta: readUploadMeta(),
 };
 
@@ -53,8 +52,8 @@ async function fetchOptional(path, fallback) {
 
 function renderLoading() {
   root.innerHTML = `
-    <main class="shell${state.navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(state.mode, state.view, state.navOpen)}
+    <main class="shell">
+      ${renderNavbar(state.mode, state.view)}
       <section class="status-card">Loading ${state.mode === "historical" ? "historical" : "new data"} ${state.view === "map" ? "map" : "intelligence"}...</section>
     </main>
   `;
@@ -63,8 +62,8 @@ function renderLoading() {
 
 function renderError(error) {
   root.innerHTML = `
-    <main class="shell${state.navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(state.mode, state.view, state.navOpen)}
+    <main class="shell">
+      ${renderNavbar(state.mode, state.view)}
       <section class="status-card error">
         <strong>Could not load dashboard data</strong>
         <span>${error.message}</span>
@@ -88,7 +87,6 @@ async function loadDashboard(mode = state.mode) {
       root.innerHTML = renderMapPage({
         mode,
         view: state.view,
-        navOpen: state.navOpen,
       });
       initMapView(heatmap, hotspots, mode);
     } else if (state.view === "dispatch") {
@@ -99,7 +97,6 @@ async function loadDashboard(mode = state.mode) {
       root.innerHTML = renderDispatchPage({
         mode,
         view: state.view,
-        navOpen: state.navOpen,
       });
       initDispatchView(hotspots, recommendations, mode);
     } else {
@@ -119,7 +116,6 @@ async function loadDashboard(mode = state.mode) {
       root.innerHTML = renderDashboard({
         mode,
         view: state.view,
-        navOpen: state.navOpen,
         uploadMeta: state.uploadMeta,
         health,
         stats,
@@ -180,15 +176,7 @@ function bindNav() {
     });
   });
 
-  // Sidebar toggle — only when clicking the nav background, not a button
-  document.querySelectorAll("[data-side-nav]").forEach((nav) => {
-    nav.addEventListener("click", (event) => {
-      if (event.target.closest("[data-mode]") || event.target.closest("[data-view]")) return;
-      state.navOpen = !state.navOpen;
-      nav.classList.toggle("is-open", state.navOpen);
-      document.querySelector(".shell")?.classList.toggle("nav-pinned", state.navOpen);
-    });
-  });
+
 }
 
 function bindUploadForm() {

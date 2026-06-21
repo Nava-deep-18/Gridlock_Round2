@@ -191,12 +191,12 @@ function renderMapContainer(mode) {
  * Renders the full map page (navbar + header + map container).
  * Used by main.jsx when state.view === "map".
  */
-export function renderMapPage({ mode, view, navOpen }) {
+export function renderMapPage({ mode, view }) {
   const isHistorical = mode === "historical";
   
   return `
-    <main class="shell${navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(mode, view, navOpen)}
+    <main class="shell">
+      ${renderNavbar(mode, view)}
       <div class="page-top">
         <div class="page-greeting">
           <p>Spatial Intelligence</p>

@@ -3,12 +3,12 @@ import { renderNavbar } from "./Navbar.jsx";
 /**
  * Renders the layout of the dedicated Patrol Window page.
  */
-export function renderDispatchPage({ mode, view, navOpen }) {
+export function renderDispatchPage({ mode, view }) {
   const isHistorical = mode === "historical";
 
   return `
-    <main class="shell${navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(mode, view, navOpen)}
+    <main class="shell">
+      ${renderNavbar(mode, view)}
 
       <div class="page-top">
         <div class="page-greeting">

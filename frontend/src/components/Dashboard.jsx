@@ -25,7 +25,7 @@ function renderDataContext(mode, uploadMeta) {
 }
 
 export function renderDashboard({
-  mode, view, navOpen, uploadMeta,
+  mode, view, uploadMeta,
   health, stats, hotspots,
   stationSummary, temporalSummary, vehicleSummary, repeatOffenders,
 }) {
@@ -41,8 +41,8 @@ export function renderDashboard({
     : 0.42;
 
   return `
-    <main class="shell${navOpen ? " nav-pinned" : ""}">
-      ${renderNavbar(mode, view, navOpen)}
+    <main class="shell">
+      ${renderNavbar(mode, view)}
 
       <div class="page-top">
         <div class="page-greeting">
