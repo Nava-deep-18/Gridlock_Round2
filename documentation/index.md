@@ -1,54 +1,55 @@
 # Tutorial: Gridlock_Round2
 
-ParkSense AI is an *intelligent system* that helps Bengaluru Traffic Police (BTP) combat **parking-induced traffic congestion**. It acts like a digital detective, using an **AI data pipeline** to analyze parking violation records, automatically pinpoint areas with concentrated illegal parking (*hotspots*), and predict when and where new problems are likely to emerge. The system then provides **actionable patrol recommendations** through an *interactive dashboard*, allowing officers to target enforcement strategically and *reduce traffic woes*.
+ParkSense AI is an innovative system that leverages artificial intelligence to transform raw parking violation data from Bengaluru Traffic Police into *actionable intelligence*. It automatically identifies **hotspots** of illegal parking, quantifies their *congestion impact (PICI score)*, and generates **proactive patrol recommendations**. All these insights are presented through an interactive *frontend dashboard* that also supports processing of *new data uploads* for dynamic operational planning.
 
 
 **Source Repository:** [None](None)
 
 ```mermaid
 flowchart TD
-    A0["AI Data Pipeline
+    A0["AI Processing Pipeline
 "]
-    A1["PICI (Parking-Induced Congestion Impact) Scoring
+    A1["FastAPI Backend
 "]
-    A2["Hotspot Detection (DBSCAN)
+    A2["PICI (Parking-Induced Congestion Impact) Score
 "]
-    A3["Patrol Recommendation Engine (XGBoost)
+    A3["Hotspot Detection & Ranking
 "]
-    A4["FastAPI Backend Services
+    A4["Patrol Recommendation Engine
 "]
-    A5["Frontend Interactive Dashboard
+    A5["Frontend Dashboard
 "]
-    A6["Two-Mode Operational Data
+    A6["Historical and New Data Modes
 "]
-    A0 -- "Calculates scores" --> A1
-    A0 -- "Executes clustering" --> A2
-    A0 -- "Executes prediction" --> A3
-    A4 -- "Invokes processing" --> A0
-    A2 -- "Feeds hotspot data" --> A3
-    A1 -- "Informs ranking" --> A2
-    A4 -- "Serves results" --> A5
-    A5 -- "Uploads data" --> A4
-    A6 -- "Configures pipeline" --> A0
-    A4 -- "Controls data mode" --> A6
+    A5 -- "Interacts With" --> A1
+    A1 -- "Executes Pipeline" --> A0
+    A0 -- "Calculates Score" --> A2
+    A0 -- "Performs Detection" --> A3
+    A0 -- "Generates Recommendations" --> A4
+    A2 -- "Used for Ranking" --> A3
+    A2 -- "Used for Prioritization" --> A4
+    A1 -- "Supports Modes" --> A6
+    A6 -- "Adjusts Parameters" --> A0
+    A3 -- "Visualizes Hotspots" --> A5
+    A4 -- "Visualizes Recommendations" --> A5
 ```
 
 ## Chapters
 
-1. [Frontend Interactive Dashboard
-](01_frontend_interactive_dashboard_.md)
-2. [FastAPI Backend Services
-](02_fastapi_backend_services_.md)
-3. [Two-Mode Operational Data
-](03_two_mode_operational_data_.md)
-4. [AI Data Pipeline
-](04_ai_data_pipeline_.md)
-5. [PICI (Parking-Induced Congestion Impact) Scoring
-](05_pici__parking_induced_congestion_impact__scoring_.md)
-6. [Hotspot Detection (DBSCAN)
-](06_hotspot_detection__dbscan__.md)
-7. [Patrol Recommendation Engine (XGBoost)
-](07_patrol_recommendation_engine__xgboost__.md)
+1. [PICI (Parking-Induced Congestion Impact) Score
+](01_pici__parking_induced_congestion_impact__score_.md)
+2. [Hotspot Detection & Ranking
+](02_hotspot_detection___ranking_.md)
+3. [Patrol Recommendation Engine
+](03_patrol_recommendation_engine_.md)
+4. [Frontend Dashboard
+](04_frontend_dashboard_.md)
+5. [Historical and New Data Modes
+](05_historical_and_new_data_modes_.md)
+6. [AI Processing Pipeline
+](06_ai_processing_pipeline_.md)
+7. [FastAPI Backend
+](07_fastapi_backend_.md)
 
 
 ---

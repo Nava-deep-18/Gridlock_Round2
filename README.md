@@ -41,14 +41,6 @@ Implemented:
 - Temporal, vehicle, station-load, and repeat-offender dashboard modules.
 - Professional deep-blue dashboard layout.
 
-Known scope still to improve:
-
-- Add deployment/hosting configuration for production.
-- Move long-running upload processing to a background job/progress workflow for production.
-- Tighten CORS and environment-specific settings before production deployment.
-- Remove or fill placeholder frontend files left from the initial scaffold.
-- Replace inline SVG icons with an icon package if the frontend dependency set is expanded.
-
 ## Repository Structure
 
 ```text
@@ -83,32 +75,39 @@ Known scope still to improve:
 `-- requirements.txt
 ```
 
-## Architecture
+## 1. System Architecture
 
-```text
-Raw CSV / Uploaded CSV
-        |
-        v
-Data cleaning and schema validation
-        |
-        v
-Feature engineering and PICI scoring
-        |
-        v
-DBSCAN hotspot clustering
-        |
-        v
-Temporal patrol-window prediction
-        |
-        v
-Parquet outputs in data/processed/{mode}
-        |
-        v
-FastAPI JSON endpoints
-        |
-        v
-Vite dashboard
+The following diagram illustrates the flow of data from ingestion through feature engineering, spatial/temporal modeling, API serving, and rendering on the user interface:
+
+```mermaid
+graph TD
+    %% Ingestion & Pipeline
+    RawCSV[Raw CSV: violations.csv / Uploaded CSV] -->|data_pipeline.py| CleanParquet[Clean Parquet: clean_violations.parquet]
+    CleanParquet -->|feature_engineering.py| FeaturedParquet[Featured Parquet: featured_violations.parquet]
+    FeaturedParquet -->|ml_models.py: DBSCAN| ClusteredParquet[Clustered Parquet: clustered_violations.parquet]
+    ClusteredParquet -->|ml_models.py: XGBoost| PatrolParquet[Patrol Parquet: patrol_recommendations.parquet]
+    
+    %% Backend Serving
+    FeaturedParquet -.->|Read & Cache| API[FastAPI routes: analytics.py]
+    ClusteredParquet -.->|Read & Cache| API
+    PatrolParquet -.->|Read & Cache| API
+    
+    %% API Endpoints
+    API -->|GET /api/stats| Scorecards[Stats / Scorecards]
+    API -->|GET /api/heatmap| Heatmap[Leaflet Heatmap Layer]
+    API -->|GET /api/hotspots| Hotspots[Hotspot Table & Pins]
+    API -->|GET /api/summary/*| Summaries[Station, Temporal & Vehicle Summaries]
+    API -->|GET /api/recommendations| Recs[Patrol Recommendations & Scheduler]
+    
+    %% Frontend Pages
+    Scorecards -->|main.jsx| DashboardPage[Dashboard Page]
+    Hotspots -->|main.jsx| DashboardPage
+    Summaries -->|main.jsx| DashboardPage
+    Heatmap -->|MapView.jsx| MapPage[Map Page]
+    Recs -->|DispatchView.jsx| PatrolPage[Patrol Scheduler Page]
 ```
+
+
 
 ## Operational Modes
 
